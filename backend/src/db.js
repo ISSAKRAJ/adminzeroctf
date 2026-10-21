@@ -1,7 +1,16 @@
 const Database = require("better-sqlite3");
 const path = require("path");
 
-const db = new Database(path.join(__dirname, "../honeypot.db"));
+const dbPath = path.join(__dirname, "../honeypot.db");
+const db = new Database(dbPath);
+
+// Enable WAL mode for high concurrency without locking
+try {
+  db.pragma("journal_mode = WAL");
+  db.pragma("synchronous = NORMAL");
+} catch (e) {
+  console.warn("⚠️ [DB] Could not set WAL mode:", e.message);
+}
 
 function initDB() {
   // Public tables — challengers can query these
@@ -28,7 +37,7 @@ function initDB() {
       decoy TEXT
     );
 
-    -- REAL FLAG: protected by all 7 layers
+    -- REAL FLAG: protected by all security layers
     CREATE TABLE IF NOT EXISTS flag_table (
       id INTEGER PRIMARY KEY,
       secret TEXT NOT NULL
@@ -74,35 +83,28 @@ function initDB() {
     ins.run("CTF T-Shirt", 14.99, "Merch", 150);
   }
 
-  // Seed honeypot (decoy)
+  // Seed honeypot decoy
   const fakeCount = db.prepare("SELECT COUNT(*) as c FROM fake_flags").get();
   if (fakeCount.c === 0) {
     db.prepare("INSERT INTO fake_flags (decoy) VALUES (?)").run("ADMINZERO_FAKE_{n0t_th3_r34l_fl4g}");
   }
 
-  // Real flag — MUST be set via CTF_FLAG environment variable.
-  // There is NO hardcoded fallback. The server will throw if CTF_FLAG is missing.
-  const flagCount = db.prepare("SELECT COUNT(*) as c FROM flag_table").get();
-  if (flagCount.c === 0) {
-    const flag = process.env.CTF_FLAG;
-    if (!flag || flag.trim() === "") {
-      throw new Error("[ADMINZERO] CTF_FLAG environment variable is not set. Refusing to start without a flag.");
-    }
-    db.prepare("INSERT INTO flag_table (secret) VALUES (?)").run(flag.trim());
-  }
+  // Seed/Sync Real Flag
+  const currentFlag = (process.env.CTF_FLAG || "ADMINZERO_CTF{AST_1s_th3_l4st_W4ll_y0u_w1ll_3v3r_s33}").trim();
+  db.exec("DELETE FROM flag_table;");
+  db.prepare("INSERT INTO flag_table (secret) VALUES (?)").run(currentFlag);
 
-  // Seed super secret admin (CTF honeypot)
-  const adminCount = db.prepare("SELECT COUNT(*) as c FROM super_secret_admin").get();
-  if (adminCount.c === 0) {
-    db.prepare("INSERT INTO super_secret_admin (role, capture_flag) VALUES (?, ?)").run('super_admin', 'AZ_FLAG{w3lc0m3_t0_th3_d4rk_s1d3}');
-  }
+  db.exec("DELETE FROM super_secret_admin;");
+  db.prepare("INSERT INTO super_secret_admin (role, capture_flag) VALUES (?, ?)").run("super_admin", currentFlag);
 }
 
 function logAttempt(ip, query, blocked, reason) {
   try {
     db.prepare("INSERT INTO audit_log (ip, query, blocked, reason) VALUES (?, ?, ?, ?)")
-      .run(ip, query?.substring(0, 500), blocked ? 1 : 0, reason || null);
-  } catch {}
+      .run(ip || "unknown", (query || "").substring(0, 500), blocked ? 1 : 0, reason || null);
+  } catch (err) {
+    console.error("Audit Log Error:", err.message);
+  }
 }
 
 function getAuditLogs(limit = 100) {

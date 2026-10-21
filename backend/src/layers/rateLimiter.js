@@ -1,34 +1,30 @@
 // LAYER 1: Rate Limiter
-// Limits abuse by IP address. Tightened to 5 attempts per minute.
-// The key generator strips x-forwarded-for trust abuse by using the
-// socket address when the forwarded header looks spoofed (multiple IPs).
+// Limits abuse by IP address.
+// Fully proxy-aware for cloud platforms (Render, Railway, Fly.io, Cloudflare).
 
 const rateLimit = require("express-rate-limit");
 
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded && typeof forwarded === "string") {
+    // The first IP in the X-Forwarded-For chain is the real client IP
+    const clientIp = forwarded.split(",")[0].trim();
+    if (clientIp) return clientIp;
+  }
+  return req.ip || req.socket?.remoteAddress || "127.0.0.1";
+}
+
 const limiter = rateLimit({
-  windowMs: 60 * 1000,  // 1 minute window
-  max: 5,               // max 5 requests per window (was 8)
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // 30 requests per minute per IP (enough for human exploration, blocks aggressive flood)
   standardHeaders: true,
   legacyHeaders: false,
-  // Custom key generator to prevent x-forwarded-for spoofing:
-  // If the forwarded header contains multiple IPs (comma-separated),
-  // it may be a spoofed chain — fall back to the real socket address.
-  keyGenerator: (req) => {
-    const forwarded = req.headers["x-forwarded-for"];
-    if (forwarded && typeof forwarded === "string") {
-      const ips = forwarded.split(",").map((ip) => ip.trim());
-      // If exactly one IP and it looks valid, use it
-      if (ips.length === 1 && /^[\d.]+$|^[0-9a-fA-F:]+$/.test(ips[0])) {
-        return ips[0];
-      }
-    }
-    // Fall back to socket address (cannot be spoofed at the TCP level)
-    return req.socket.remoteAddress || "unknown";
-  },
+  validate: { trustProxy: false, xForwardedForHeader: false },
+  keyGenerator: (req) => getClientIp(req),
   message: {
     blocked: true,
     reason: "LAYER_1_RATE_LIMIT",
-    message: "Slow down. 5 attempts per minute. You are being watched."
+    message: "Rate limit reached (30 requests/min). Please slow down."
   }
 });
 

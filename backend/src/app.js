@@ -17,44 +17,39 @@ const { initTelemetryDB, logCTFAttempt, getCTFStats } = require("./telemetryDb")
 
 const app = express();
 
-// ─── Startup Guard ────────────────────────────────────────────────────────────
+// Trust reverse proxy headers (Render, Railway, Fly.io, Cloudflare)
+app.set("trust proxy", true);
+
+// ─── Startup Configuration ───────────────────────────────────────────────────
+const CTF_FLAG = (process.env.CTF_FLAG || "ADMINZERO_CTF{AST_1s_th3_l4st_W4ll_y0u_w1ll_3v3r_s33}").trim();
 if (!process.env.CTF_FLAG) {
-  console.error("❌ [ADMINZERO] FATAL: CTF_FLAG environment variable is not set.");
-  process.exit(1);
+  console.warn("⚠️  [ADMINZERO] CTF_FLAG not set in env. Using default challenge flag.");
 }
 
-// Init DB
+// Init Databases (WAL mode enabled)
 initDB();
 initTelemetryDB();
 
-// ─── Security Headers ─────────────────────────────────────────────────────────
+// ─── Security Headers & CORS ─────────────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'none'"],
-      frameSrc:   ["'none'"],
-      objectSrc:  ["'none'"],
-    },
-  },
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
   hidePoweredBy: true,
   noSniff: true,
 }));
 
-const allowedOrigin = process.env.FRONTEND_URL;
+// Robust CORS: Allow browser frontend from any origin (Vercel, custom domains, localhost)
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || process.env.NODE_ENV !== "production") return callback(null, true);
-    if (allowedOrigin && origin === allowedOrigin) return callback(null, true);
-    callback(new Error("CORS: Origin not allowed"));
-  },
-  methods: ["POST", "GET"],
-  allowedHeaders: ["Content-Type", "X-Challenge-Token"],
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "X-Challenge-Token", "Authorization"],
   exposedHeaders: ["X-Next-Token"],
 }));
 
-app.use(express.json({ limit: "2kb" }));
+app.use(express.json({ limit: "4kb" }));
 
-// ─── Error Sanitizer ─────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 const isProd = process.env.NODE_ENV === "production";
 
 function safeReason(reason) {
@@ -62,10 +57,16 @@ function safeReason(reason) {
   return reason;
 }
 
-// ─── Timing Jitter ────────────────────────────────────────────────────────────
-// Adds a random delay to ALL responses (pass AND fail) to defeat timing attacks.
-// Attackers cannot infer which layer rejected them from response time.
-function jitter(minMs = 80, maxMs = 350) {
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (forwarded && typeof forwarded === "string") {
+    const clientIp = forwarded.split(",")[0].trim();
+    if (clientIp) return clientIp;
+  }
+  return req.ip || req.socket?.remoteAddress || "127.0.0.1";
+}
+
+function jitter(minMs = 60, maxMs = 250) {
   return new Promise(resolve =>
     setTimeout(resolve, minMs + Math.floor(Math.random() * (maxMs - minMs)))
   );
@@ -78,255 +79,129 @@ app.get("/", (req, res) => {
     version: "3.0.0",
     status: "ARMED",
     layers: 12,
-    message: "POST your SQL to /query. Include X-Challenge-Token from the previous response. Good luck."
+    message: "POST your SQL to /v1/ctf/query. Good luck."
   });
 });
 
-// ─── Main Challenge Endpoint ─────────────────────────────────────────────────
-app.post("/query", limiter, async (req, res) => {
-  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket.remoteAddress;
-  const { query } = req.body;
+// ─── Core Query Controller ───────────────────────────────────────────────────
+async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
+  const ip = getClientIp(req);
+  const { query, hacker_alias } = req.body || {};
   const reqId = uuidv4().split("-")[0].toUpperCase();
   const challengeToken = req.headers["x-challenge-token"];
+  const alias = (typeof hacker_alias === "string" ? hacker_alias.trim().substring(0, 50) : "Anonymous");
 
-  // ─── LAYER 10: Behavioral tier check (pre-everything) ──────────────────────
-  const tier = getTier(ip);
-
-  // Hard ban — tier 3
-  if (tier >= 3) {
-    return res.status(403).json({ blocked: true, reqId, reason: "BEHAVIORAL_HARD_BAN" });
-  }
-
-  // Shadow ban — tier 2: return convincing fake data, log the attempt
-  if (tier >= 2) {
-    await jitter(2000, 2100);
-    logAttempt(ip, query || "[shadow]", false, "SHADOW_BAN_RESPONSE");
-    return res.status(200).json(getShadowResponse(ip, reqId));
-  }
-
-  // ─── LAYER 11: Challenge token validation ──────────────────────────────────
-  const challengeCheck = validateToken(ip, challengeToken);
-  if (!challengeCheck.valid) {
-    await jitter();
+  // Helper to respond with block and always attach a fresh token for recovery
+  const respondBlocked = async (status, reason, detail) => {
     recordBlock(ip);
-    logAttempt(ip, query || "", true, challengeCheck.reason);
-    return res.status(403).json({ blocked: true, reqId, reason: safeReason(challengeCheck.reason) });
-  }
-
-  // ─── LAYER 0: Basic input validation ──────────────────────────────────────
-  if (!query || typeof query !== "string") {
+    logAttempt(ip, query || "", true, reason);
+    if (isCtfEndpoint) {
+      logCTFAttempt(alias, query || "", query || "", reason, false);
+    }
     await jitter();
-    return res.status(400).json({ blocked: true, reqId, reason: safeReason("LAYER_0: No query provided.") });
-  }
-
-  if (query.length > 300) {
-    logAttempt(ip, query, true, "QUERY_TOO_LONG");
-    await jitter();
-    recordBlock(ip);
-    return res.status(400).json({ blocked: true, reqId, reason: safeReason("LAYER_0: Query too long.") });
-  }
-
-  // Control characters
-  if (/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(query)) {
-    logAttempt(ip, query, true, "CONTROL_CHARS");
-    await jitter();
-    recordBlock(ip);
-    return res.status(400).json({ blocked: true, reqId, reason: safeReason("LAYER_0: Invalid characters.") });
-  }
-
-  // ─── LAYER 12: Query normalization ────────────────────────────────────────
-  // Normalize FIRST — strip homoglyphs, zero-width chars, collapse whitespace.
-  // All subsequent layers operate on the normalized form.
-  const normalizedQuery = normalizeQuery(query);
-
-  // ─── LAYER 2: Encoding detection (on normalized query) ────────────────────
-  const enc = detectEncoding(normalizedQuery);
-  if (enc.detected) {
-    logAttempt(ip, query, true, enc.reason);
-    await jitter();
-    recordBlock(ip);
-    return res.status(400).json({
+    const nextToken = issueToken(ip, reqId);
+    res.setHeader("X-Next-Token", nextToken);
+    return res.status(status).json({
       blocked: true,
       reqId,
-      reason: "INPUT_OBFUSCATION_BLOCKED",
+      nextToken,
+      reason: safeReason(reason),
+      detail: isProd ? undefined : detail
     });
-  }
+  };
 
-  // ─── LAYER 3: Keyword blacklist (on normalized query) ─────────────────────
-  const bl = checkBlacklist(normalizedQuery);
-  if (bl.blocked) {
-    logAttempt(ip, query, true, bl.reason);
-    await jitter();
-    recordBlock(ip);
-    return res.status(403).json({
-      blocked: true,
-      reqId,
-      reason: "CRITICAL risk score",
-    });
-  }
-
-  // ─── LAYERS 4/5/6/7/9: AST Guard ─────────────────────────────────────────
-  // Passes normalized query — original user string is never used in DB
-  const ast = validateAST(normalizedQuery);
-  if (!ast.valid) {
-    logAttempt(ip, query, true, ast.reason);
-    await jitter();
-    recordBlock(ip);
-    return res.status(403).json({
-      blocked: true,
-      reqId,
-      reason: ast.reason === "Depth limit exceeded" ? ast.reason : safeReason(ast.reason),
-    });
-  }
-
-  // ─── All layers passed — execute the reconstructed query ──────────────────
   try {
-    const rawRows = runSafeQuery(ast.safeQuery);
+    // ─── LAYER 10: Behavioral Guard (Pre-check) ─────────────────────────────
+    const tier = getTier(ip);
 
-    // LAYER 8: PII Scrubber
+    if (tier >= 3) {
+      return respondBlocked(403, "BEHAVIORAL_HARD_BAN");
+    }
+
+    if (tier >= 2) {
+      await jitter(1500, 2000);
+      logAttempt(ip, query || "[shadow]", false, "SHADOW_BAN_RESPONSE");
+      if (isCtfEndpoint) {
+        logCTFAttempt(alias, query || "", query || "", "BLOCKED_BY_SHADOW_BAN", false);
+      }
+      const nextToken = issueToken(ip, reqId);
+      res.setHeader("X-Next-Token", nextToken);
+      const shadowData = getShadowResponse(ip, reqId);
+      return res.status(200).json({ ...shadowData, nextToken });
+    }
+
+    // ─── LAYER 11: Challenge Token Validation (MUST run BEFORE issueToken) ──
+    const challengeCheck = validateToken(ip, challengeToken);
+    if (!challengeCheck.valid) {
+      return respondBlocked(403, challengeCheck.reason || "LAYER_11_CHALLENGE_FAILED");
+    }
+
+    // Now issue the next challenge token for subsequent query
+    const nextToken = issueToken(ip, reqId);
+    res.setHeader("X-Next-Token", nextToken);
+
+    // ─── LAYER 0: Input Sanitization ─────────────────────────────────────────
+    if (!query || typeof query !== "string") {
+      return respondBlocked(400, "LAYER_0: No query provided.");
+    }
+
+    if (query.length > 500) {
+      return respondBlocked(400, "LAYER_0: Query exceeds 500 characters.");
+    }
+
+    if (/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(query)) {
+      return respondBlocked(400, "LAYER_0: Query contains forbidden control characters.");
+    }
+
+    // ─── LAYER 12: Query Normalization ───────────────────────────────────────
+    const normalizedQuery = normalizeQuery(query);
+
+    // ─── LAYER 2: Encoding Obfuscation Detection ────────────────────────────
+    const enc = detectEncoding(normalizedQuery);
+    if (enc.detected) {
+      return respondBlocked(400, enc.reason);
+    }
+
+    // ─── LAYER 3: Keyword & Injection Blacklist ──────────────────────────────
+    const bl = checkBlacklist(normalizedQuery);
+    if (bl.blocked) {
+      return respondBlocked(403, bl.reason);
+    }
+
+    // ─── LAYERS 4, 5, 6, 7, 9: AST Guard ────────────────────────────────────
+    let ast;
+    try {
+      ast = validateAST(normalizedQuery);
+    } catch (parseErr) {
+      return respondBlocked(403, "LAYER_5_PARSE_FAIL: Malformed query AST.", parseErr.message);
+    }
+
+    if (!ast.valid) {
+      return respondBlocked(403, ast.reason);
+    }
+
+    // ─── Execution Phase (Reconstructed SQL Only) ────────────────────────────
+    const rawRows = runSafeQuery(ast.safeQuery);
     const rows = scrubRows(rawRows);
 
-    // Apply tier 1 penalty delay (repeated failures but not yet shadow-banned)
-    const delay = getPenaltyDelayMs(tier);
-    if (delay > 0) await new Promise(r => setTimeout(r, delay));
-    else await jitter(50, 200); // baseline jitter for passing queries
+    // Flag capture verification
+    const jsonResult = JSON.stringify(rows);
+    const capturedFlag = jsonResult.includes(CTF_FLAG) || jsonResult.includes("AZ_FLAG{w3lc0m3_t0_th3_d4rk_s1d3}");
 
     logAttempt(ip, query, false, "PASSED_ALL_LAYERS");
+    if (isCtfEndpoint) {
+      logCTFAttempt(alias, query, ast.safeQuery, "EXECUTED", capturedFlag);
+    }
+
+    // Behavioral forgiveness on legitimate requests
     recordPass(ip);
-
-    // Issue next challenge token and attach to response header
-    const nextToken = issueToken(ip, reqId);
-    res.setHeader("X-Next-Token", nextToken);
-
-    return res.json({
-      blocked: false,
-      reqId,
-      layers_passed: 12,
-      tables: ast.tables,
-      rows,
-      nextToken, // Also in body for clients that can't read headers
-      message: "Query passed all 12 AdminZero security layers."
-    });
-
-  } catch (err) {
-    logAttempt(ip, query, true, `EXEC_ERROR: ${err.message}`);
-    await jitter();
-    recordBlock(ip);
-    return res.status(500).json({
-      blocked: true,
-      reqId,
-      reason: safeReason("EXEC_ERROR"),
-      detail: isProd ? undefined : err.message
-    });
-  }
-});
-
-// ─── CTF Stats Endpoint ──────────────────────────────────────────────────────
-app.get("/v1/ctf/stats", (req, res) => {
-  res.json(getCTFStats());
-});
-
-// ─── CTF Logs Endpoint (Admin) ───────────────────────────────────────────────
-app.get("/v1/ctf/logs", (req, res) => {
-  const limit = parseInt(req.query.limit, 10) || 100;
-  res.json(getAuditLogs(limit));
-});
-
-// ─── CTF Honeypot Endpoint ───────────────────────────────────────────────────
-app.post("/v1/ctf/query", limiter, async (req, res) => {
-  const ip = req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.socket.remoteAddress;
-  const { query, hacker_alias } = req.body;
-  const reqId = uuidv4().split("-")[0].toUpperCase();
-  const challengeToken = req.headers["x-challenge-token"];
-  
-  // Using query for both prompt and generatedSql since we skip Gemini integration
-  const prompt = query || "";
-  const generatedSql = query || "";
-
-  const tier = getTier(ip);
-
-  if (tier >= 3) {
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_BEHAVIORAL_HARD_BAN", false);
-    return res.status(403).json({ blocked: true, reqId, reason: "BEHAVIORAL_HARD_BAN" });
-  }
-
-  if (tier >= 2) {
-    await jitter(2000, 2100);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_SHADOW_BAN", false);
-    return res.status(200).json(getShadowResponse(ip, reqId));
-  }
-
-  const challengeCheck = validateToken(ip, challengeToken);
-  if (!challengeCheck.valid) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_CHALLENGE_TOKEN", false);
-    return res.status(403).json({ blocked: true, reqId, reason: safeReason(challengeCheck.reason) });
-  }
-
-  if (!query || typeof query !== "string") {
-    await jitter();
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_L0", false);
-    return res.status(400).json({ blocked: true, reqId, reason: safeReason("LAYER_0: No query provided.") });
-  }
-
-  if (query.length > 300) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_L0", false);
-    return res.status(400).json({ blocked: true, reqId, reason: safeReason("LAYER_0: Query too long.") });
-  }
-
-  if (/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(query)) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_L0", false);
-    return res.status(400).json({ blocked: true, reqId, reason: safeReason("LAYER_0: Invalid characters.") });
-  }
-
-  const normalizedQuery = normalizeQuery(query);
-
-  const enc = detectEncoding(normalizedQuery);
-  if (enc.detected) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_L2", false);
-    return res.status(400).json({ blocked: true, reqId, reason: "INPUT_OBFUSCATION_BLOCKED" });
-  }
-
-  const bl = checkBlacklist(normalizedQuery);
-  if (bl.blocked) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_PROMPT_GUARD", false);
-    return res.status(403).json({ blocked: true, reqId, reason: "CRITICAL risk score" });
-  }
-
-  const ast = validateAST(normalizedQuery);
-  if (!ast.valid) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "BLOCKED_BY_AST", false);
-    return res.status(403).json({ blocked: true, reqId, reason: ast.reason === "Depth limit exceeded" ? ast.reason : safeReason(ast.reason) });
-  }
-
-  try {
-    const rawRows = runSafeQuery(ast.safeQuery);
-    const rows = scrubRows(rawRows);
-    
-    // Flag check
-    const jsonString = JSON.stringify(rows);
-    const capturedFlag = jsonString.includes("AZ_FLAG{w3lc0m3_t0_th3_d4rk_s1d3}") || (process.env.CTF_FLAG && jsonString.includes(process.env.CTF_FLAG));
-    
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "EXECUTED", capturedFlag);
 
     const delay = getPenaltyDelayMs(tier);
-    if (delay > 0) await new Promise(r => setTimeout(r, delay));
-    else await jitter(50, 200);
-
-    recordPass(ip);
-    const nextToken = issueToken(ip, reqId);
-    res.setHeader("X-Next-Token", nextToken);
+    if (delay > 0) {
+      await new Promise(r => setTimeout(r, delay));
+    } else {
+      await jitter(40, 150);
+    }
 
     return res.json({
       blocked: false,
@@ -335,25 +210,36 @@ app.post("/v1/ctf/query", limiter, async (req, res) => {
       tables: ast.tables,
       rows,
       nextToken,
-      message: "Query passed all 12 AdminZero security layers."
+      message: "Query cleared all AdminZero security layers."
     });
 
   } catch (err) {
-    await jitter();
-    recordBlock(ip);
-    logCTFAttempt(hacker_alias, prompt, generatedSql, "EXEC_ERROR", false);
-    return res.status(500).json({
-      blocked: true,
-      reqId,
-      reason: safeReason("EXEC_ERROR"),
-      detail: isProd ? undefined : err.message
-    });
+    return respondBlocked(500, "EXEC_ERROR", err.message);
   }
+}
+
+// ─── Endpoints ───────────────────────────────────────────────────────────────
+app.post("/query", limiter, (req, res) => processQuery(req, res, { isCtfEndpoint: false }));
+app.post("/v1/ctf/query", limiter, (req, res) => processQuery(req, res, { isCtfEndpoint: true }));
+
+app.get("/v1/ctf/stats", (req, res) => {
+  res.json(getCTFStats());
 });
 
-// ─── 404 ──────────────────────────────────────────────────────────────────────
+app.get("/v1/ctf/logs", (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit, 10) || 100, 500);
+  res.json(getAuditLogs(limit));
+});
+
+// 404
 app.use((req, res) => {
-  res.status(404).json({ error: "Not found." });
+  res.status(404).json({ error: "Endpoint not found." });
+});
+
+// Global Error Handler (Prevents HTML 500 crashes)
+app.use((err, req, res, next) => {
+  console.error("Unhandled Server Error:", err.message);
+  res.status(500).json({ blocked: true, error: "Internal server error." });
 });
 
 module.exports = app;

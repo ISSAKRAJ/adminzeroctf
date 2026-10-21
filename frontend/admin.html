@@ -127,9 +127,18 @@
   </div>
 
   <script>
-    const API = "https://YOUR_BACKEND_URL_HERE"; // e.g. https://xyz.up.railway.app
+    const CONFIG_BACKEND = "https://YOUR_BACKEND_URL_HERE"; // Replace with your Render URL (e.g. https://adminzero-ctf.onrender.com)
+    const API = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("YOUR_BACKEND_URL"))
+      ? CONFIG_BACKEND
+      : (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:3001"
+        : CONFIG_BACKEND;
 
     async function fetchLogs() {
+      if (!API || API.includes("YOUR_BACKEND_URL")) {
+        document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="status-blocked">Please set your backend URL in admin.html (CONFIG_BACKEND).</td></tr>`;
+        return;
+      }
       try {
         const res = await fetch(`${API}/v1/ctf/logs`);
         const logs = await res.json();

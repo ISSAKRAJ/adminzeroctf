@@ -318,16 +318,24 @@
   </div>
 
   <script>
-    const API = "https://YOUR_BACKEND_URL_HERE"; // e.g. https://xyz.up.railway.app
+    const CONFIG_BACKEND = "https://YOUR_BACKEND_URL_HERE"; // Replace with your Render URL (e.g. https://adminzero-ctf.onrender.com)
+    const API = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("YOUR_BACKEND_URL"))
+      ? CONFIG_BACKEND
+      : (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+        ? "http://localhost:3001"
+        : CONFIG_BACKEND;
+
+    let nextChallengeToken = localStorage.getItem("az_ctf_token") || null;
 
     async function fetchStats() {
+      if (!API || API.includes("YOUR_BACKEND_URL")) return;
       try {
         const res = await fetch(`${API}/v1/ctf/stats`);
         const stats = await res.json();
-        document.getElementById("statBlocked").textContent = stats.total_attacks_blocked.toLocaleString();
-        document.getElementById("statBypasses").textContent = stats.successful_bypasses.toLocaleString();
+        document.getElementById("statBlocked").textContent = Number(stats.total_attacks_blocked || 0).toLocaleString();
+        document.getElementById("statBypasses").textContent = Number(stats.successful_bypasses || 0).toLocaleString();
       } catch (err) {
-        console.error("Failed to load stats", err);
+        // Silent fail on polling to keep UI clean
       }
     }
     
@@ -335,65 +343,78 @@
     setInterval(fetchStats, 5000);
     fetchStats();
 
-    let nextChallengeToken = null;
+    async function fireQuery() {
+      const query = document.getElementById("queryInput").value.trim();
+      const hacker_alias = document.getElementById("hackerAlias").value.trim();
+      if (!query) return;
 
-async function fireQuery() {
-  const query = document.getElementById("queryInput").value.trim();
-  const hacker_alias = document.getElementById("hackerAlias").value.trim();
-  if (!query) return;
+      if (!API || API.includes("YOUR_BACKEND_URL")) {
+        const resultEl = document.getElementById("result");
+        resultEl.style.display = "block";
+        resultEl.className = "result fail";
+        document.getElementById("resultTag").textContent = "✗ CONFIG ERROR";
+        document.getElementById("resultBody").textContent = "Please set your backend URL in index.html (CONFIG_BACKEND).";
+        return;
+      }
 
-  const btn = document.querySelector(".btn-fire");
-  btn.innerHTML = '<span class="spinner"></span>Firing...';
-  btn.disabled = true;
+      const btn = document.querySelector(".btn-fire");
+      btn.innerHTML = '<span class="spinner"></span>Firing...';
+      btn.disabled = true;
 
-  try {
-    const res = await fetch(`${API}/v1/ctf/query`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(nextChallengeToken ? { "X-Challenge-Token": nextChallengeToken } : {})
-      },
-      body: JSON.stringify({ query, hacker_alias })
-    });
-    const data = await res.json();
+      try {
+        const res = await fetch(`${API}/v1/ctf/query`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(nextChallengeToken ? { "X-Challenge-Token": nextChallengeToken } : {})
+          },
+          body: JSON.stringify({ query, hacker_alias })
+        });
+        const data = await res.json();
 
-    // Store token for next request
-    if (data.nextToken) nextChallengeToken = data.nextToken;
+        // Always store and rotate next challenge token
+        if (data.nextToken) {
+          nextChallengeToken = data.nextToken;
+          localStorage.setItem("az_ctf_token", nextChallengeToken);
+        }
 
-    const resultEl = document.getElementById("result");
-    const tagEl = document.getElementById("resultTag");
-    const bodyEl = document.getElementById("resultBody");
-    const titleEl = document.getElementById("resultTitle");
-    const reqEl = document.getElementById("reqId");
+        const resultEl = document.getElementById("result");
+        const tagEl = document.getElementById("resultTag");
+        const bodyEl = document.getElementById("resultBody");
+        const titleEl = document.getElementById("resultTitle");
+        const reqEl = document.getElementById("reqId");
 
-    resultEl.style.display = "block";
+        resultEl.style.display = "block";
 
-    if (data.blocked === false) {
-      resultEl.className = "result pass";
-      tagEl.className = "tag pass";
-      tagEl.textContent = "✓ PASSED";
-      titleEl.textContent = `${data.layers_passed} Layers Cleared`;
-    } else {
-      resultEl.className = "result fail";
-      tagEl.className = "tag fail";
-      tagEl.textContent = "✗ BLOCKED";
-      titleEl.textContent = "AdminZero Blocked You";
+        if (data.blocked === false) {
+          resultEl.className = "result pass";
+          tagEl.className = "tag pass";
+          tagEl.textContent = "✓ PASSED";
+          titleEl.textContent = `${data.layers_passed || 12} Layers Cleared`;
+        } else {
+          resultEl.className = "result fail";
+          tagEl.className = "tag fail";
+          tagEl.textContent = "✗ BLOCKED";
+          titleEl.textContent = "AdminZero Blocked You";
+        }
+
+        if (data.reqId) reqEl.textContent = `REQ ${data.reqId}`;
+        bodyEl.textContent = JSON.stringify(data, null, 2);
+
+        // Refresh stats immediately on query completion
+        fetchStats();
+
+      } catch (err) {
+        const resultEl = document.getElementById("result");
+        resultEl.style.display = "block";
+        resultEl.className = "result fail";
+        document.getElementById("resultTag").textContent = "✗ ERROR";
+        document.getElementById("resultBody").textContent = "Connection failed: " + err.message;
+      }
+
+      btn.innerHTML = "⚡ Fire Query";
+      btn.disabled = false;
     }
-
-    if (data.reqId) reqEl.textContent = `REQ ${data.reqId}`;
-    bodyEl.textContent = JSON.stringify(data, null, 2);
-
-  } catch (err) {
-    const resultEl = document.getElementById("result");
-    resultEl.style.display = "block";
-    resultEl.className = "result fail";
-    document.getElementById("resultTag").textContent = "✗ ERROR";
-    document.getElementById("resultBody").textContent = err.message;
-  }
-
-  btn.innerHTML = "⚡ Fire Query";
-  btn.disabled = false;
-}
 
     function clearAll() {
       document.getElementById("queryInput").value = "";

@@ -1,7 +1,15 @@
 const Database = require("better-sqlite3");
 const path = require("path");
 
-const telemetryDb = new Database(path.join(__dirname, "../telemetry.db"));
+const telemetryDbPath = path.join(__dirname, "../telemetry.db");
+const telemetryDb = new Database(telemetryDbPath);
+
+try {
+  telemetryDb.pragma("journal_mode = WAL");
+  telemetryDb.pragma("synchronous = NORMAL");
+} catch (e) {
+  console.warn("⚠️ [TELEMETRY] Could not set WAL mode:", e.message);
+}
 
 function initTelemetryDB() {
   telemetryDb.exec(`
@@ -21,7 +29,7 @@ function logCTFAttempt(hackerAlias, prompt, generatedSql, wafStatus, capturedFla
   try {
     telemetryDb.prepare(
       "INSERT INTO ctf_attempts (hacker_alias, prompt, generated_sql, waf_status, captured_flag) VALUES (?, ?, ?, ?, ?)"
-    ).run(hackerAlias || "Anonymous", prompt, generatedSql, wafStatus, capturedFlag ? 1 : 0);
+    ).run(hackerAlias || "Anonymous", prompt || "", generatedSql || "", wafStatus || "BLOCKED", capturedFlag ? 1 : 0);
   } catch (err) {
     console.error("Telemetry Logging Error:", err.message);
   }
@@ -34,11 +42,11 @@ function getCTFStats() {
     return {
       total_attacks_blocked: totalBlocked,
       successful_bypasses: bypasses,
-      bounty_payout: bypasses === 0 ? '$1,000' : 'CLAIMED'
+      bounty_payout: bypasses === 0 ? "CLAIM PRIZE" : "CLAIMED"
     };
   } catch (err) {
     console.error("Telemetry Stats Error:", err.message);
-    return { total_attacks_blocked: 0, successful_bypasses: 0, bounty_payout: '$1,000' };
+    return { total_attacks_blocked: 0, successful_bypasses: 0, bounty_payout: "CLAIM PRIZE" };
   }
 }
 
