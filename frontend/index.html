@@ -245,7 +245,7 @@
 
   <span class="badge">🛡 Open Challenge by AdminZero</span>
   <h1>Break The Wall.</h1>
-  <p class="subtitle">12 security layers. One flag. Can you extract it?</p>
+  <p class="subtitle">20 security layers. One flag. Can you extract it?</p>
 
   <div class="stats-board">
     <div class="stat-box">
@@ -255,10 +255,6 @@
     <div class="stat-box">
       <div class="stat-value text-green" id="statBypasses">0</div>
       <div class="stat-label">Bypasses</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value text-yellow" id="statPayout">$1,000</div>
-      <div class="stat-label">Bounty Payout</div>
     </div>
   </div>
 
@@ -300,20 +296,20 @@
 
   <div class="rules">
     <div class="rule-card">
-      <h3>🎯 The Challenge</h3>
-      <p>A flag is hidden deep inside this system. It passes through 7 layers of AdminZero's AST-based query firewall. Extract the flag, submit on LinkedIn tagging @adminzero and @issak.</p>
+      <h3>⚔️ The "Un-hackable" Challenge</h3>
+      <p>I built a 20-Layer AI Privacy Gateway using AST Math and In-Memory Behavioral tracking. I don't think it can be broken. Prove me wrong.</p>
     </div>
     <div class="rule-card">
       <h3>📋 Rules</h3>
       <p>Only SQL queries. Max 500 characters. 8 attempts per minute. No tools that directly hit the DB. Query the API only. Fair play — document your method.</p>
     </div>
     <div class="rule-card">
-      <h3>🗂 Schema Hint</h3>
-      <p>Accessible tables: <code>users</code>, <code>products</code>. Everything else is restricted. Or is it? Good luck figuring out what's behind the wall.</p>
+      <h3>🏆 Hall of Fame</h3>
+      <p>Capture the flag to get your name, GitHub link, and hacker alias permanently enshrined on the front page as a "Verified Security Elite".</p>
     </div>
     <div class="rule-card">
-      <h3>🏆 Prize</h3>
-      <p>Public credit on AdminZero's site, LinkedIn shoutout, early access to AdminZero Pro, and a place in our contributor hall of fame.</p>
+      <h3>🎁 The Loot</h3>
+      <p>A lifetime free "Enterprise Tier" AdminZero API key, plus a glowing LinkedIn recommendation detailing how you audited our complex 20-Layer WAF architecture.</p>
     </div>
   </div>
 
@@ -330,7 +326,6 @@
         const stats = await res.json();
         document.getElementById("statBlocked").textContent = stats.total_attacks_blocked.toLocaleString();
         document.getElementById("statBypasses").textContent = stats.successful_bypasses.toLocaleString();
-        document.getElementById("statPayout").textContent = stats.bounty_payout;
       } catch (err) {
         console.error("Failed to load stats", err);
       }
@@ -340,57 +335,65 @@
     setInterval(fetchStats, 5000);
     fetchStats();
 
-    async function fireQuery() {
-      const query = document.getElementById("queryInput").value.trim();
-      const hacker_alias = document.getElementById("hackerAlias").value.trim();
-      if (!query) return;
+    let nextChallengeToken = null;
 
-      const btn = document.querySelector(".btn-fire");
-      btn.innerHTML = '<span class="spinner"></span>Firing...';
-      btn.disabled = true;
+async function fireQuery() {
+  const query = document.getElementById("queryInput").value.trim();
+  const hacker_alias = document.getElementById("hackerAlias").value.trim();
+  if (!query) return;
 
-      try {
-        const res = await fetch(`${API}/v1/ctf/query`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, hacker_alias })
-        });
-        const data = await res.json();
+  const btn = document.querySelector(".btn-fire");
+  btn.innerHTML = '<span class="spinner"></span>Firing...';
+  btn.disabled = true;
 
-        const resultEl = document.getElementById("result");
-        const tagEl = document.getElementById("resultTag");
-        const bodyEl = document.getElementById("resultBody");
-        const titleEl = document.getElementById("resultTitle");
-        const reqEl = document.getElementById("reqId");
+  try {
+    const res = await fetch(`${API}/v1/ctf/query`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(nextChallengeToken ? { "X-Challenge-Token": nextChallengeToken } : {})
+      },
+      body: JSON.stringify({ query, hacker_alias })
+    });
+    const data = await res.json();
 
-        resultEl.style.display = "block";
+    // Store token for next request
+    if (data.nextToken) nextChallengeToken = data.nextToken;
 
-        if (data.blocked === false) {
-          resultEl.className = "result pass";
-          tagEl.className = "tag pass";
-          tagEl.textContent = "✓ PASSED";
-          titleEl.textContent = `${data.layers_passed} Layers Cleared`;
-        } else {
-          resultEl.className = "result fail";
-          tagEl.className = "tag fail";
-          tagEl.textContent = "✗ BLOCKED";
-          titleEl.textContent = "AdminZero Blocked You";
-        }
+    const resultEl = document.getElementById("result");
+    const tagEl = document.getElementById("resultTag");
+    const bodyEl = document.getElementById("resultBody");
+    const titleEl = document.getElementById("resultTitle");
+    const reqEl = document.getElementById("reqId");
 
-        if (data.reqId) reqEl.textContent = `REQ ${data.reqId}`;
-        bodyEl.textContent = JSON.stringify(data, null, 2);
+    resultEl.style.display = "block";
 
-      } catch (err) {
-        const resultEl = document.getElementById("result");
-        resultEl.style.display = "block";
-        resultEl.className = "result fail";
-        document.getElementById("resultTag").textContent = "✗ ERROR";
-        document.getElementById("resultBody").textContent = err.message;
-      }
-
-      btn.innerHTML = "⚡ Fire Query";
-      btn.disabled = false;
+    if (data.blocked === false) {
+      resultEl.className = "result pass";
+      tagEl.className = "tag pass";
+      tagEl.textContent = "✓ PASSED";
+      titleEl.textContent = `${data.layers_passed} Layers Cleared`;
+    } else {
+      resultEl.className = "result fail";
+      tagEl.className = "tag fail";
+      tagEl.textContent = "✗ BLOCKED";
+      titleEl.textContent = "AdminZero Blocked You";
     }
+
+    if (data.reqId) reqEl.textContent = `REQ ${data.reqId}`;
+    bodyEl.textContent = JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    const resultEl = document.getElementById("result");
+    resultEl.style.display = "block";
+    resultEl.className = "result fail";
+    document.getElementById("resultTag").textContent = "✗ ERROR";
+    document.getElementById("resultBody").textContent = err.message;
+  }
+
+  btn.innerHTML = "⚡ Fire Query";
+  btn.disabled = false;
+}
 
     function clearAll() {
       document.getElementById("queryInput").value = "";
