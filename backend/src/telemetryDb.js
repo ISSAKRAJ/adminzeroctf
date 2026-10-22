@@ -2,6 +2,7 @@ const Database = require("better-sqlite3");
 const path = require("path");
 const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
+const { Pool } = require("pg");
 
 const telemetryDbPath = path.join(__dirname, "../telemetry.db");
 const telemetryDb = new Database(telemetryDbPath);
@@ -13,6 +14,34 @@ try {
   console.warn("⚠️ [TELEMETRY] Could not set WAL mode:", e.message);
 }
 
+// ─── Neon Cloud PostgreSQL Connection ─────────────────────────────────────────
+const DATABASE_URL = (
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.NEON_DATABASE_URL ||
+  ""
+).trim();
+
+const isNeonConfigured = Boolean(
+  DATABASE_URL && (DATABASE_URL.startsWith("postgres://") || DATABASE_URL.startsWith("postgresql://"))
+);
+
+let pgPool = null;
+if (isNeonConfigured) {
+  try {
+    pgPool = new Pool({
+      connectionString: DATABASE_URL,
+      ssl: { rejectUnauthorized: false }
+    });
+    console.log("⚡ [NEON DB] Detected Neon PostgreSQL cloud database connection.");
+  } catch (err) {
+    console.warn("⚠️ [NEON DB] Could not initialize Postgres pool:", err.message);
+    pgPool = null;
+  }
+} else {
+  console.log("📁 [TELEMETRY] No DATABASE_URL found. Running with local SQLite database.");
+}
+
 const IP_SALT = process.env.IP_SALT || "adminzero_ip_salt_2026_telemetry";
 
 function hashIp(ip) {
@@ -20,7 +49,8 @@ function hashIp(ip) {
   return crypto.createHmac("sha256", IP_SALT).update(String(ip).trim()).digest("hex").substring(0, 16);
 }
 
-function initTelemetryDB() {
+async function initTelemetryDB() {
+  // 1. Local SQLite Schema
   telemetryDb.exec(`
     -- Registered hackers
     CREATE TABLE IF NOT EXISTS hackers (
@@ -87,6 +117,128 @@ function initTelemetryDB() {
   try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN role TEXT;"); } catch {}
   try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN country TEXT;"); } catch {}
   try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN linkedin_url TEXT;"); } catch {}
+
+  // 2. Initialize Neon DB if configured
+  if (pgPool) {
+    try {
+      await pgPool.query(`
+        CREATE TABLE IF NOT EXISTS hackers (
+          id SERIAL PRIMARY KEY,
+          session_id VARCHAR(120) UNIQUE NOT NULL,
+          handle VARCHAR(100) UNIQUE NOT NULL,
+          real_name VARCHAR(255),
+          email VARCHAR(255) NOT NULL,
+          role VARCHAR(100),
+          country VARCHAR(100),
+          github_url VARCHAR(255),
+          linkedin_url VARCHAR(255),
+          signup_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          total_points INTEGER DEFAULT 0,
+          flags_captured INTEGER DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS attempts (
+          id SERIAL PRIMARY KEY,
+          handle VARCHAR(100),
+          session_id VARCHAR(120),
+          ip_hash VARCHAR(64),
+          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          layer_targeted VARCHAR(100),
+          payload_summary TEXT,
+          response_code INTEGER,
+          blocked INTEGER DEFAULT 1,
+          bypassed INTEGER DEFAULT 0,
+          points_awarded INTEGER DEFAULT 0
+        );
+
+        CREATE TABLE IF NOT EXISTS first_solvers (
+          id SERIAL PRIMARY KEY,
+          layer_targeted VARCHAR(100) UNIQUE NOT NULL,
+          handle VARCHAR(100) NOT NULL,
+          badge_name VARCHAR(255) NOT NULL,
+          bonus_points INTEGER DEFAULT 500,
+          timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      console.log("⚡ [NEON DB] PostgreSQL schemas verified and initialized successfully in Neon Cloud.");
+
+      // Restore existing Neon hackers if local container was recreated
+      const sqliteCount = telemetryDb.prepare("SELECT COUNT(*) as c FROM hackers").get().c;
+      if (sqliteCount === 0) {
+        const pgHackers = await pgPool.query("SELECT * FROM hackers");
+        if (pgHackers.rows && pgHackers.rows.length > 0) {
+          console.log(`⚡ [NEON DB] Restoring ${pgHackers.rows.length} hackers from Neon Cloud into local memory...`);
+          const ins = telemetryDb.prepare(`
+            INSERT OR IGNORE INTO hackers (session_id, handle, real_name, email, role, country, github_url, linkedin_url, signup_time, last_active, total_points, flags_captured)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `);
+          for (const h of pgHackers.rows) {
+            ins.run(h.session_id, h.handle, h.real_name, h.email, h.role, h.country, h.github_url, h.linkedin_url, String(h.signup_time), String(h.last_active), h.total_points, h.flags_captured);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("⚠️ [NEON DB] Could not initialize Postgres schemas:", err.message);
+    }
+  }
+}
+
+async function syncHackerToNeon(hacker, isNew = false) {
+  if (!pgPool) return;
+  try {
+    if (isNew) {
+      await pgPool.query(`
+        INSERT INTO hackers (session_id, handle, real_name, email, role, country, github_url, linkedin_url, total_points, flags_captured)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      `, [
+        hacker.session_id, hacker.handle, hacker.real_name, hacker.email,
+        hacker.role, hacker.country, hacker.github_url, hacker.linkedin_url,
+        hacker.total_points || 0, hacker.flags_captured || 0
+      ]);
+    } else {
+      await pgPool.query(`
+        UPDATE hackers SET 
+          real_name = COALESCE(NULLIF($1, ''), real_name),
+          role = COALESCE(NULLIF($2, ''), role),
+          country = COALESCE(NULLIF($3, ''), country),
+          github_url = COALESCE($4, github_url),
+          linkedin_url = COALESCE($5, linkedin_url),
+          last_active = CURRENT_TIMESTAMP
+        WHERE LOWER(handle) = LOWER($6)
+      `, [hacker.real_name, hacker.role, hacker.country, hacker.github_url, hacker.linkedin_url, hacker.handle]);
+    }
+  } catch (err) {
+    console.warn("⚠️ [NEON DB] Cloud hacker sync error:", err.message);
+  }
+}
+
+async function syncAttemptToNeon(attempt) {
+  if (!pgPool) return;
+  try {
+    await pgPool.query(`
+      INSERT INTO attempts (
+        handle, session_id, ip_hash, layer_targeted, payload_summary,
+        response_code, blocked, bypassed, points_awarded
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+    `, [
+      attempt.handle, attempt.session_id, attempt.ip_hash,
+      attempt.layer_targeted, attempt.payload_summary, attempt.response_code,
+      attempt.blocked, attempt.bypassed, attempt.points_awarded
+    ]);
+
+    if (attempt.handle && attempt.points_awarded > 0) {
+      await pgPool.query(`
+        UPDATE hackers SET 
+          total_points = total_points + $1,
+          flags_captured = flags_captured + $2,
+          last_active = CURRENT_TIMESTAMP
+        WHERE LOWER(handle) = LOWER($3)
+      `, [attempt.points_awarded, attempt.captured_flag ? 1 : 0, attempt.handle]);
+    }
+  } catch (err) {
+    console.warn("⚠️ [NEON DB] Cloud attempt sync error:", err.message);
+  }
 }
 
 // ─── Registration & Profile ──────────────────────────────────────────────────
@@ -148,6 +300,7 @@ function registerHacker({ handle, real_name, email, role, country, github_url, l
       `).run(cleanRealName, cleanRole, cleanCountry, cleanGithub, cleanLinkedin, existingByHandle.id);
 
       const refreshed = telemetryDb.prepare("SELECT * FROM hackers WHERE id = ?").get(existingByHandle.id);
+      syncHackerToNeon(refreshed, false);
       return {
         isNew: false,
         session_id: refreshed.session_id,
@@ -201,6 +354,7 @@ function registerHacker({ handle, real_name, email, role, country, github_url, l
   }
 
   const newHacker = telemetryDb.prepare("SELECT * FROM hackers WHERE id = ?").get(info.lastInsertRowid);
+  syncHackerToNeon(newHacker, true);
   return {
     isNew: true,
     session_id: finalSessionId,
@@ -341,6 +495,20 @@ function logAttemptRecord({
       "INSERT INTO ctf_attempts (hacker_alias, prompt, generated_sql, waf_status, captured_flag) VALUES (?, ?, ?, ?, ?)"
     ).run(effectiveHandle || "Anonymous", safePayload, safePayload, blocked ? layer_targeted : "EXECUTED", captured_flag ? 1 : 0);
   } catch {}
+
+  // Also sync attempt to Neon Cloud Database
+  syncAttemptToNeon({
+    handle: effectiveHandle,
+    session_id,
+    ip_hash,
+    layer_targeted,
+    payload_summary: safePayload,
+    response_code,
+    blocked,
+    bypassed,
+    points_awarded: pointsAwarded,
+    captured_flag
+  });
 
   return {
     attemptId: info.lastInsertRowid,
