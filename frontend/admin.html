@@ -869,7 +869,7 @@
             type="text"
             id="searchHackerInput"
             class="search-input"
-            placeholder="Search handle or email..."
+            placeholder="Search handle, real name, email, role, country..."
             oninput="debounceSearch()"
           />
           <input
@@ -890,16 +890,17 @@
             <thead>
               <tr>
                 <th>Handle</th>
+                <th>Real Name</th>
                 <th>Email</th>
+                <th>Role</th>
+                <th>Country</th>
                 <th>Signup</th>
-                <th>Sessions</th>
-                <th>Last Active</th>
                 <th>Points</th>
                 <th style="text-align: right;">Action</th>
               </tr>
             </thead>
             <tbody id="hackersTableBody">
-              <tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-dim);">Loading hacker directory...</td></tr>
+              <tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-dim);">Loading hacker directory...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1144,21 +1145,21 @@
         const tbody = document.getElementById("hackersTableBody");
 
         if (!data.hackers || data.hackers.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-dim);">No hackers found matching the filter.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-dim);">No hackers found matching the filter.</td></tr>`;
           return;
         }
 
         tbody.innerHTML = data.hackers.map(h => {
           const signup = h.signup_time ? new Date(h.signup_time).toLocaleDateString() : "—";
-          const lastActive = h.last_active ? new Date(h.last_active).toLocaleTimeString() : "—";
 
           return `
             <tr>
               <td class="hacker-handle-col">@${escapeHtml(h.handle)}</td>
+              <td><strong>${escapeHtml(h.real_name || '—')}</strong></td>
               <td class="hacker-email-col">${escapeHtml(h.email)}</td>
+              <td><span style="font-size:0.75rem; color:var(--neon-cyan);">${escapeHtml(h.role || 'Researcher')}</span></td>
+              <td>${escapeHtml(h.country || 'Global')}</td>
               <td>${signup}</td>
-              <td><strong>${h.session_count || 1}</strong></td>
-              <td>${lastActive}</td>
               <td><span style="font-family:var(--font-mono); font-weight:700; color:var(--neon-emerald);">${(h.total_points || 0).toLocaleString()} PTS</span></td>
               <td style="text-align: right;">
                 <button class="btn-inspect" onclick="inspectHacker(${h.id})">Inspect →</button>
@@ -1187,7 +1188,12 @@
 
         // Populate Hero & Mini Stats
         document.getElementById("dhHandle").textContent = `@${hacker.handle}`;
-        document.getElementById("dhEmail").textContent = hacker.email;
+        document.getElementById("dhEmail").innerHTML = `
+          <strong>${escapeHtml(hacker.real_name || 'Anonymous')}</strong> ·
+          <span>${escapeHtml(hacker.email)}</span> ·
+          <span style="color:var(--neon-cyan);">${escapeHtml(hacker.role || 'Researcher')}</span> ·
+          <span>${escapeHtml(hacker.country || 'Global')}</span>
+        `;
         document.getElementById("dhSignup").textContent = hacker.signup_time ? new Date(hacker.signup_time).toLocaleString() : "—";
         document.getElementById("dhPoints").textContent = (hacker.total_points || 0).toLocaleString();
         document.getElementById("dhAttempts").textContent = (timeline || []).length;
@@ -1196,13 +1202,12 @@
         document.getElementById("dhBypasses").textContent = bypassCount;
         document.getElementById("dhLastActive").textContent = hacker.last_active ? new Date(hacker.last_active).toLocaleString() : "—";
 
-        // GitHub link
+        // GitHub and LinkedIn links
         const ghWrap = document.getElementById("dhGithubLink");
-        if (hacker.github_url) {
-          ghWrap.innerHTML = `<a href="${escapeHtml(hacker.github_url)}" target="_blank" class="btn-inspect" style="text-decoration:none;">GitHub Profile ↗</a>`;
-        } else {
-          ghWrap.innerHTML = "";
-        }
+        let linksHtml = '';
+        if (hacker.github_url) linksHtml += `<a href="${escapeHtml(hacker.github_url)}" target="_blank" class="btn-inspect" style="text-decoration:none; margin-right:6px;">GitHub ↗</a>`;
+        if (hacker.linkedin_url) linksHtml += `<a href="${escapeHtml(hacker.linkedin_url)}" target="_blank" class="btn-inspect" style="text-decoration:none; color:var(--neon-amber); border-color:var(--neon-amber);">LinkedIn ↗</a>`;
+        ghWrap.innerHTML = linksHtml;
 
         // Flag badge
         document.getElementById("dhFlagBadge").style.display = hacker.flags_captured > 0 ? "inline-block" : "none";

@@ -18,6 +18,7 @@ const { initDB, logAttempt, getAuditLogs, runSafeQuery } = require("./db");
 const {
   initTelemetryDB,
   registerHacker,
+  isRegisteredHacker,
   getHackerBySession,
   getHackerByHandle,
   logAttemptRecord,
@@ -117,6 +118,14 @@ app.get("/admin", (req, res) => {
   res.status(404).json({ error: "Admin page not found" });
 });
 
+app.get("/about", (req, res) => {
+  const aboutPath = path.join(FRONTEND_DIR, "about.html");
+  if (fs.existsSync(aboutPath)) {
+    return res.sendFile(aboutPath);
+  }
+  res.redirect("/");
+});
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get("/health", (req, res) => {
   res.json({
@@ -150,6 +159,18 @@ async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
   const challengeToken = req.headers["x-challenge-token"];
   const clientSessionId = req.headers["x-session-id"] || session_id || null;
   const alias = (typeof hacker_alias === "string" ? hacker_alias.trim().substring(0, 50) : null);
+
+  // ─── Mandatory Enlistment Gate ──────────────────────────────────────────────
+  // Challengers must register their identity before attacking the 12-layer wall
+  const isRegistered = isRegisteredHacker(clientSessionId, alias);
+  if (!isRegistered) {
+    return res.status(401).json({
+      blocked: true,
+      registration_required: true,
+      error: "REGISTRATION_REQUIRED",
+      message: "Access Denied: You must register a hacker identity before attacking the 12-layer wall."
+    });
+  }
 
   // Helper to record attempt and respond with block
   const respondBlocked = async (status, layerTargeted, reason, detail) => {
@@ -332,10 +353,10 @@ app.post("/v1/ctf/query", limiter, (req, res) => processQuery(req, res, { isCtfE
 // 2. Registration Endpoint
 app.post("/v1/ctf/register", (req, res) => {
   try {
-    const { handle, email, github_url } = req.body || {};
+    const { handle, real_name, email, role, country, github_url, linkedin_url } = req.body || {};
     const session_id = req.headers["x-session-id"] || req.body?.session_id;
 
-    const result = registerHacker({ handle, email, github_url, session_id });
+    const result = registerHacker({ handle, real_name, email, role, country, github_url, linkedin_url, session_id });
     res.json({
       success: true,
       session_id: result.session_id,

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About AdminZero — The Autonomous AI Privacy &amp; Security Gateway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #07090e;
+      --bg-surface: #0c1017;
+      --bg-card: rgba(15, 21, 32, 0.75);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(0, 240, 255, 0.25);
+
+      --neon-cyan: #00f0ff;
+      --neon-red: #ff0055;
+      --neon-emerald: #00ff88;
+      --neon-amber: #ffb703;
+      --neon-purple: #a855f7;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-base);
+      background-image: 
+        radial-gradient(ellipse at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 80%, rgba(255, 0, 85, 0.05) 0%, transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+      background-size: 100% 4px;
+      z-index: 999;
+      pointer-events: none;
+      opacity: 0.5;
+    }
+
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 5rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Top Nav */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      margin-bottom: 3rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .brand-shield {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-red));
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, var(--neon-cyan), #0099ff);
+      color: #05070a;
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 800;
+      transition: filter 0.15s;
+    }
+
+    .nav-btn:hover { filter: brightness(1.15); }
+
+    .nav-ghost {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s;
+    }
+
+    .nav-ghost:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--neon-cyan);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-red) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-lead {
+      max-width: 760px;
+      margin: 0 auto;
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Content Cards */
+    .content-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 2.25rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+
+    .content-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .content-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Problem vs Solution Grid */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .compare-grid { grid-template-columns: 1fr; }
+    }
+
+    .compare-box {
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .box-bad {
+      background: rgba(255, 0, 85, 0.05);
+      border: 1px solid rgba(255, 0, 85, 0.25);
+    }
+
+    .box-good {
+      background: rgba(0, 255, 136, 0.05);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+    }
+
+    .box-title {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    .box-bad .box-title { color: var(--neon-red); }
+    .box-good .box-title { color: var(--neon-emerald); }
+
+    .compare-box ul {
+      padding-left: 1.25rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    /* 12 Layer Stack Listing */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    @media (max-width: 850px) {
+      .stack-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 550px) {
+      .stack-grid { grid-template-columns: 1fr; }
+    }
+
+    .stack-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .stack-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      margin-bottom: 0.25rem;
+    }
+
+    .stack-name {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+
+    .stack-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    /* CTA Section */
+    .cta-banner {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 85, 0.1));
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    .cta-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .cta-desc {
+      max-width: 600px;
+      margin: 0 auto 1.75rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .cta-btn-large {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--neon-cyan), #0099ff);
+      color: #05070a;
+      text-decoration: none;
+      padding: 0.9rem 2rem;
+      border-radius: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+    }
+
+    .cta-btn-large:hover {
+      filter: brightness(1.15);
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.5);
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 2rem;
+      margin-top: 4rem;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.78rem;
+    }
+
+    .footer a {
+      color: var(--neon-cyan);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <a href="/" class="brand">
+        <div class="brand-shield">🛡</div>
+        <span>AdminZero CTF</span>
+      </a>
+
+      <div class="nav-links">
+        <a href="/" class="nav-btn">⚔️ Enter Attack Arena</a>
+        <a href="/admin" class="nav-ghost">Operator Console →</a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="eyebrow">
+        <span>🛡 Security Intelligence Briefing</span>
+      </div>
+      <h1 class="hero-title">
+        What is <span>AdminZero</span>?
+      </h1>
+      <p class="hero-lead">
+        The Autonomous AI Privacy &amp; Data Security Gateway engineered to render SQL injections, prompt manipulation, and database exfiltration mathematically impossible.
+      </p>
+    </section>
+
+    <!-- Section 1: The Problem & The Mission -->
+    <section class="content-card">
+      <div class="card-label">01 // The Core Problem</div>
+      <h2 class="card-title">Traditional WAFs Are Dead in the Age of AI</h2>
+      <p>
+        Modern enterprise applications, autonomous AI agents, and Natural Language Interfaces now write their own SQL queries and API requests on the fly.
+      </p>
+      <p>
+        Legacy Web Application Firewalls (Cloudflare, AWS WAF, ModSecurity) rely on <strong>Regular Expressions (Regex)</strong> and known signature blacklists. In an AI world, attackers can bypass regex in seconds using inline comments (<code>/**/</code>), hex encodings, recursive nesting, and semantic prompt injections.
+      </p>
+
+      <div class="compare-grid">
+        <div class="compare-box box-bad">
+          <div class="box-title">❌ Traditional Regex Firewalls</div>
+          <ul>
+            <li>Pattern-based string matching easily bypassed</li>
+            <li>Zero understanding of SQL grammatical intent</li>
+            <li>Blind to AST recursion and nested subqueries</li>
+            <li>High rate of false positives on legitimate queries</li>
+          </ul>
+        </div>
+        <div class="compare-box box-good">
+          <div class="box-title">✓ AdminZero 12-Layer AST Gateway</div>
+          <ul>
+            <li>Parses raw strings into a strict Mathematical AST tree</li>
+            <li>Enforces semantic table and schema whitelist locks</li>
+            <li>Extracts AST intent and reconstructs queries safely</li>
+            <li>In-memory behavioral anomaly detection and PII scrubbing</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: How It Works -->
+    <section class="content-card">
+      <div class="card-label">02 // The Architecture</div>
+      <h2 class="card-title">The 12-Layer Autonomous Perimeter</h2>
+      <p>
+        Every request sent to an application protected by AdminZero passes sequentially through 12 rigorous security stages. If even a single layer flags an anomaly, the query is quenched and logged in real-time.
+      </p>
+
+      <div class="stack-grid">
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 01</div>
+          <div class="stack-name">Rate Limiter</div>
+          <div class="stack-desc">Dynamic sliding-window IP throttling and anti-brute-force defense.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 02</div>
+          <div class="stack-name">Encoding Detector</div>
+          <div class="stack-desc">Recursive decoding of Hex, Base64, URL-double encode, and unicode tricks.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 03</div>
+          <div class="stack-name">Keyword Blacklist</div>
+          <div class="stack-desc">Instant rejection of destructive DDL, schema alteration, and OS execution primitives.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 04</div>
+          <div class="stack-name">Query Normalizer</div>
+          <div class="stack-desc">Strips obfuscation comments, variable whitespaces, and noise tokens.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 05</div>
+          <div class="stack-name">AST Parser</div>
+          <div class="stack-desc">Compiles SQL into an Abstract Syntax Tree. Rejects unparseable injection grammar.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 06</div>
+          <div class="stack-name">Complexity Scorer</div>
+          <div class="stack-desc">Evaluates AST depth, Cartesian joins, and nested subquery recursion traps.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 07</div>
+          <div class="stack-name">Intent &amp; Semantic</div>
+          <div class="stack-desc">Strict table schema locks. Prohibits reading unauthorized or metadata tables.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 08</div>
+          <div class="stack-name">Token Chaining</div>
+          <div class="stack-desc">Rotational cryptographic challenge tokens preventing scripted replay attacks.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 09</div>
+          <div class="stack-name">Shannon Entropy</div>
+          <div class="stack-desc">Analyzes cryptographic randomness to detect obfuscated payload strings.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 10</div>
+          <div class="stack-name">Honey Canary</div>
+          <div class="stack-desc">Deception tables that silently trigger instant behavioral quarantine.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 11</div>
+          <div class="stack-name">PII Scrubber</div>
+          <div class="stack-desc">In-memory redaction of sensitive credentials, secrets, and private records.</div>
+        </div>
+        <div class="stack-item">
+          <div class="stack-tag">LAYER 12</div>
+          <div class="stack-name">Output Redactor</div>
+          <div class="stack-desc">Executes strictly the safe AST-reconstructed query, enforcing row count caps.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Why Break The Wall? -->
+    <section class="content-card">
+      <div class="card-label">03 // The Public CTF Challenge</div>
+      <h2 class="card-title">Why Did We Build "Break The Wall"?</h2>
+      <p>
+        In cybersecurity, talk is cheap. Rather than claiming our AI privacy gateway is secure, we put it on the open internet and invited the world's best hackers, penetration testers, and security researchers to break it.
+      </p>
+      <p>
+        <strong>The Goal:</strong> We placed a high-value CTF flag inside our protected database. Challengers have full access to an attack terminal where they can send raw SQL injection strings. To extract the flag, a query must successfully bypass all 12 layers simultaneously without triggering AST violations, semantic locks, or behavioral tripwires.
+      </p>
+      <p>
+        <strong>The Reward:</strong> Anyone who successfully captures the flag proves an architectural flaw in our defense. In return, they receive permanent enshrinement in the Hall of Fame, a public LinkedIn recommendation detailing their security audit, and lifetime free access to the AdminZero Enterprise API.
+      </p>
+    </section>
+
+    <!-- CTA Banner -->
+    <div class="cta-banner">
+      <h2 class="cta-title">Think You Can Break It?</h2>
+      <p class="cta-desc">
+        Enlist your hacker identity, step into the query arena, and fire your best payloads against the 12-layer wall.
+      </p>
+      <a href="/" class="cta-btn-large">
+        ⚡ Launch The Attack Arena
+      </a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>
+        AdminZero CTF — Break The Wall · Built by <a href="https://glitchgo.tech" target="_blank">GlitchGo</a> &amp; <a href="#">AdminZero</a>
+      </div>
+      <div style="margin-top: 0.35rem;">
+        Empowering Next-Gen AI Security &amp; Autonomous Database Governance
+      </div>
+    </footer>
+
+  </div>
+
+</body>
+</html>

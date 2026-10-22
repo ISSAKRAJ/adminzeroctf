@@ -27,8 +27,12 @@ function initTelemetryDB() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id TEXT UNIQUE NOT NULL,
       handle TEXT UNIQUE NOT NULL,
+      real_name TEXT,
       email TEXT NOT NULL,
+      role TEXT,
+      country TEXT,
       github_url TEXT,
+      linkedin_url TEXT,
       signup_time TEXT DEFAULT CURRENT_TIMESTAMP,
       last_active TEXT DEFAULT CURRENT_TIMESTAMP,
       total_points INTEGER DEFAULT 0,
@@ -77,19 +81,32 @@ function initTelemetryDB() {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Safe schema migrations for existing databases
+  try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN real_name TEXT;"); } catch {}
+  try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN role TEXT;"); } catch {}
+  try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN country TEXT;"); } catch {}
+  try { telemetryDb.exec("ALTER TABLE hackers ADD COLUMN linkedin_url TEXT;"); } catch {}
 }
 
 // ─── Registration & Profile ──────────────────────────────────────────────────
-function registerHacker({ handle, email, github_url, session_id }) {
+function registerHacker({ handle, real_name, email, role, country, github_url, linkedin_url, session_id }) {
   const cleanHandle = String(handle || "").trim();
+  const cleanRealName = String(real_name || "").trim();
   const cleanEmail = String(email || "").trim().toLowerCase();
+  const cleanRole = String(role || "Security Researcher").trim();
+  const cleanCountry = String(country || "Global").trim();
   let cleanGithub = String(github_url || "").trim();
+  let cleanLinkedin = String(linkedin_url || "").trim();
 
   if (!cleanHandle || cleanHandle.length < 2 || cleanHandle.length > 30) {
     throw new Error("Handle must be between 2 and 30 characters.");
   }
   if (!/^[a-zA-Z0-9_\-\.]+$/.test(cleanHandle)) {
     throw new Error("Handle can only contain letters, numbers, underscores, and dashes.");
+  }
+  if (!cleanRealName || cleanRealName.length < 2) {
+    throw new Error("Full Real Name is required (minimum 2 characters).");
   }
   if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
     throw new Error("A valid email address is required.");
@@ -105,22 +122,46 @@ function registerHacker({ handle, email, github_url, session_id }) {
     cleanGithub = null;
   }
 
+  // Normalize LinkedIn URL
+  if (cleanLinkedin) {
+    if (!cleanLinkedin.startsWith("http://") && !cleanLinkedin.startsWith("https://")) {
+      cleanLinkedin = `https://linkedin.com/in/${cleanLinkedin.replace(/^@/, "")}`;
+    }
+  } else {
+    cleanLinkedin = null;
+  }
+
   // Check if handle already exists
   const existingByHandle = telemetryDb.prepare("SELECT * FROM hackers WHERE handle = ? COLLATE NOCASE").get(cleanHandle);
   if (existingByHandle) {
     if (existingByHandle.email.toLowerCase() === cleanEmail) {
-      // Returning user - refresh session and last active
-      telemetryDb.prepare("UPDATE hackers SET last_active = CURRENT_TIMESTAMP WHERE id = ?").run(existingByHandle.id);
+      // Returning user - refresh session, last active, and update profile metadata
+      telemetryDb.prepare(`
+        UPDATE hackers SET 
+          real_name = COALESCE(NULLIF(?, ''), real_name),
+          role = COALESCE(NULLIF(?, ''), role),
+          country = COALESCE(NULLIF(?, ''), country),
+          github_url = COALESCE(?, github_url),
+          linkedin_url = COALESCE(?, linkedin_url),
+          last_active = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `).run(cleanRealName, cleanRole, cleanCountry, cleanGithub, cleanLinkedin, existingByHandle.id);
+
+      const refreshed = telemetryDb.prepare("SELECT * FROM hackers WHERE id = ?").get(existingByHandle.id);
       return {
         isNew: false,
-        session_id: existingByHandle.session_id,
+        session_id: refreshed.session_id,
         hacker: {
-          id: existingByHandle.id,
-          handle: existingByHandle.handle,
-          email: existingByHandle.email,
-          github_url: existingByHandle.github_url,
-          total_points: existingByHandle.total_points,
-          flags_captured: existingByHandle.flags_captured
+          id: refreshed.id,
+          handle: refreshed.handle,
+          real_name: refreshed.real_name,
+          email: refreshed.email,
+          role: refreshed.role,
+          country: refreshed.country,
+          github_url: refreshed.github_url,
+          linkedin_url: refreshed.linkedin_url,
+          total_points: refreshed.total_points,
+          flags_captured: refreshed.flags_captured
         }
       };
     } else {
@@ -140,10 +181,10 @@ function registerHacker({ handle, email, github_url, session_id }) {
     : uuidv4();
 
   const insert = telemetryDb.prepare(`
-    INSERT INTO hackers (session_id, handle, email, github_url, total_points, flags_captured)
-    VALUES (?, ?, ?, ?, 0, 0)
+    INSERT INTO hackers (session_id, handle, real_name, email, role, country, github_url, linkedin_url, total_points, flags_captured)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0)
   `);
-  const info = insert.run(finalSessionId, cleanHandle, cleanEmail, cleanGithub);
+  const info = insert.run(finalSessionId, cleanHandle, cleanRealName, cleanEmail, cleanRole, cleanCountry, cleanGithub, cleanLinkedin);
 
   // Retroactively link any anonymous attempts from this session to this handle
   try {
@@ -166,12 +207,28 @@ function registerHacker({ handle, email, github_url, session_id }) {
     hacker: {
       id: newHacker.id,
       handle: newHacker.handle,
+      real_name: newHacker.real_name,
       email: newHacker.email,
+      role: newHacker.role,
+      country: newHacker.country,
       github_url: newHacker.github_url,
+      linkedin_url: newHacker.linkedin_url,
       total_points: newHacker.total_points,
       flags_captured: newHacker.flags_captured
     }
   };
+}
+
+function isRegisteredHacker(sessionId, handle) {
+  if (handle && handle !== "Anonymous" && handle.trim().length > 0) {
+    const h = telemetryDb.prepare("SELECT id FROM hackers WHERE handle = ? COLLATE NOCASE").get(handle.trim());
+    if (h) return true;
+  }
+  if (sessionId && sessionId.trim().length > 0) {
+    const s = telemetryDb.prepare("SELECT id FROM hackers WHERE session_id = ?").get(sessionId.trim());
+    if (s) return true;
+  }
+  return false;
 }
 
 function getHackerBySession(sessionId) {
@@ -402,7 +459,8 @@ function getAdminHackersList({ search = "", date_from, date_to } = {}) {
   try {
     let sql = `
       SELECT 
-        h.id, h.session_id, h.handle, h.email, h.github_url, h.signup_time, h.last_active, h.total_points, h.flags_captured,
+        h.id, h.session_id, h.handle, h.real_name, h.email, h.role, h.country, h.github_url, h.linkedin_url,
+        h.signup_time, h.last_active, h.total_points, h.flags_captured,
         COUNT(a.id) as total_attempts,
         COALESCE(SUM(CASE WHEN a.bypassed = 1 THEN 1 ELSE 0 END), 0) as bypasses_count,
         COALESCE(SUM(CASE WHEN a.blocked = 1 THEN 1 ELSE 0 END), 0) as blocked_count
@@ -413,9 +471,9 @@ function getAdminHackersList({ search = "", date_from, date_to } = {}) {
     const params = [];
 
     if (search && search.trim()) {
-      sql += " AND (h.handle LIKE ? OR h.email LIKE ?)";
+      sql += " AND (h.handle LIKE ? OR h.email LIKE ? OR h.real_name LIKE ? OR h.role LIKE ? OR h.country LIKE ?)";
       const pattern = `%${search.trim()}%`;
-      params.push(pattern, pattern);
+      params.push(pattern, pattern, pattern, pattern, pattern);
     }
 
     if (date_from) {
@@ -581,17 +639,25 @@ function exportAttemptsToCsv() {
   try {
     const rows = telemetryDb.prepare(`
       SELECT 
-        id, timestamp, COALESCE(handle, 'Anonymous') as handle,
-        COALESCE(session_id, '') as session_id,
-        ip_hash, layer_targeted, payload_summary,
-        response_code, blocked, bypassed, points_awarded
-      FROM attempts
-      ORDER BY id ASC
+        a.id, a.timestamp, COALESCE(a.handle, 'Anonymous') as handle,
+        COALESCE(h.real_name, '') as real_name,
+        COALESCE(h.email, '') as email,
+        COALESCE(h.role, '') as role,
+        COALESCE(h.country, '') as country,
+        COALESCE(h.github_url, '') as github_url,
+        COALESCE(h.linkedin_url, '') as linkedin_url,
+        COALESCE(a.session_id, '') as session_id,
+        a.ip_hash, a.layer_targeted, a.payload_summary,
+        a.response_code, a.blocked, a.bypassed, a.points_awarded
+      FROM attempts a
+      LEFT JOIN hackers h ON (a.handle = h.handle OR a.session_id = h.session_id)
+      ORDER BY a.id ASC
     `).all();
 
     const headers = [
-      "ID", "Timestamp", "Handle", "SessionID", "IPHash",
-      "LayerTargeted", "PayloadSummary", "ResponseCode", "Blocked", "Bypassed", "PointsAwarded"
+      "ID", "Timestamp", "Handle", "RealName", "Email", "Role", "Country",
+      "GitHub", "LinkedIn", "SessionID", "IPHash", "LayerTargeted",
+      "PayloadSummary", "ResponseCode", "Blocked", "Bypassed", "PointsAwarded"
     ];
 
     const escapeCsv = (str) => {
@@ -608,6 +674,12 @@ function exportAttemptsToCsv() {
         r.id,
         escapeCsv(r.timestamp),
         escapeCsv(r.handle),
+        escapeCsv(r.real_name),
+        escapeCsv(r.email),
+        escapeCsv(r.role),
+        escapeCsv(r.country),
+        escapeCsv(r.github_url),
+        escapeCsv(r.linkedin_url),
         escapeCsv(r.session_id),
         escapeCsv(r.ip_hash),
         escapeCsv(r.layer_targeted),
@@ -622,13 +694,14 @@ function exportAttemptsToCsv() {
     return csvLines.join("\n");
   } catch (err) {
     console.error("Export CSV Error:", err.message);
-    return "ID,Timestamp,Handle,SessionID,IPHash,LayerTargeted,PayloadSummary,ResponseCode,Blocked,Bypassed,PointsAwarded\n";
+    return "ID,Timestamp,Handle,RealName,Email,Role,Country,GitHub,LinkedIn,SessionID,IPHash,LayerTargeted,PayloadSummary,ResponseCode,Blocked,Bypassed,PointsAwarded\n";
   }
 }
 
 module.exports = {
   initTelemetryDB,
   registerHacker,
+  isRegisteredHacker,
   getHackerBySession,
   getHackerByHandle,
   logAttemptRecord,

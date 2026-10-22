@@ -196,6 +196,146 @@
       border-color: var(--neon-red);
     }
 
+    .btn-about-link {
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--neon-cyan);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .btn-about-link:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    /* What is AdminZero Briefing Card */
+    .about-briefing-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glow);
+      border-radius: 14px;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .about-briefing-card::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-red), var(--neon-emerald));
+    }
+
+    .briefing-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .briefing-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .briefing-more {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--neon-cyan);
+      text-decoration: none;
+    }
+
+    .briefing-more:hover { text-decoration: underline; }
+
+    .briefing-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .briefing-text {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    .briefing-callout {
+      margin-top: 0.85rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      background: rgba(255, 0, 85, 0.08);
+      border-left: 3px solid var(--neon-red);
+      font-size: 0.82rem;
+      color: var(--text-main);
+    }
+
+    /* Gate Banner inside Query Arena */
+    .reg-gate-banner {
+      background: rgba(255, 183, 3, 0.1);
+      border: 1px solid rgba(255, 183, 3, 0.35);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .reg-gate-banner.hidden { display: none; }
+
+    .reg-gate-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--neon-amber);
+    }
+
+    .btn-gate-action {
+      background: var(--neon-amber);
+      color: #05070a;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: filter 0.15s;
+    }
+
+    .btn-gate-action:hover { filter: brightness(1.15); }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    @media (max-width: 500px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+    }
+
     /* ─── Hero Header ─── */
     .hero {
       text-align: center;
@@ -1170,6 +1310,7 @@
       </div>
 
       <div class="nav-actions">
+        <a href="/about" class="btn-about-link">ℹ️ What is AdminZero?</a>
         <div id="hackerProfilePill" class="hacker-pill" onclick="openRegistrationModal()">
           <span id="hackerPillIcon">👤</span>
           <span id="hackerPillText">Register Handle</span>
@@ -1213,6 +1354,21 @@
         <div class="hud-label">Layers Defended</div>
         <div class="hud-value" id="statLayers">12 / 12</div>
         <div class="hud-sub">Zero vulnerabilities found</div>
+      </div>
+    </section>
+
+    <!-- What is AdminZero Briefing Card -->
+    <section class="about-briefing-card">
+      <div class="briefing-header">
+        <span class="briefing-tag">🛡 Security Briefing // What is AdminZero?</span>
+        <a href="/about" class="briefing-more">Read Technical Architecture Whitepaper →</a>
+      </div>
+      <h2 class="briefing-title">Autonomous AI Privacy &amp; SQL Firewall Gateway</h2>
+      <p class="briefing-text">
+        <strong>AdminZero</strong> (engineered by GlitchGo) is a next-generation security perimeter built for modern AI agents, LLM applications, and enterprise databases. While legacy firewalls rely on easily bypassed regex string filters, AdminZero mathematically decomposes incoming queries into strict <strong>Abstract Syntax Trees (AST)</strong>, validates semantic intent, scrubs sensitive PII, and quenches prompt injection or database exfiltration attacks before they touch your database.
+      </p>
+      <div class="briefing-callout">
+        <strong>Why this challenge exists:</strong> We believe mathematical AST defense is unbreakable. We placed a secret flag behind this live 12-layer perimeter and opened it to the global hacker community to prove our architecture. Extract the flag to earn lifetime enterprise access and public recognition.
       </div>
     </section>
 
@@ -1344,6 +1500,18 @@
         </div>
 
         <div class="terminal-body">
+          <!-- Mandatory Registration Gate Banner -->
+          <div id="regGateBanner" class="reg-gate-banner">
+            <div class="reg-gate-content">
+              <span style="font-size: 1.25rem;">🔒</span>
+              <div>
+                <strong>OPERATOR ENLISTMENT REQUIRED</strong>
+                <div style="font-size: 0.72rem; opacity: 0.85;">You must register your hacker identity before attacking the 12-layer wall.</div>
+              </div>
+            </div>
+            <button class="btn-gate-action" onclick="openRegistrationModal('Registration Required to Attack')">Register Now →</button>
+          </div>
+
           <!-- Presets -->
           <div class="presets-row">
             <span class="presets-label">Presets:</span>
@@ -1499,35 +1667,68 @@
 
   <!-- Registration Modal -->
   <div class="modal-overlay" id="registrationModal">
-    <div class="modal-box">
+    <div class="modal-box" style="max-width: 540px;">
       <button class="modal-close" onclick="closeRegistrationModal()">✕</button>
-      <div class="modal-title">Claim Hacker Handle</div>
-      <div class="modal-subtitle">
-        Register once to tie all your attempts and points to your permanent Hall of Fame identity. No passwords required.
+      <div class="modal-title" id="modalTitleText">Agent Enlistment Required</div>
+      <div class="modal-subtitle" id="modalSubText">
+        You must register your hacker identity before attacking the 12-layer wall. All your attempts, bypasses, and points are bound to your verified record.
       </div>
 
       <div class="modal-error" id="modalError"></div>
 
-      <div class="form-group">
-        <label class="form-label">Handle / Alias *</label>
-        <input type="text" id="regHandle" class="form-input" placeholder="e.g. zero_cool" maxlength="30" autocomplete="off" />
-        <div class="form-hint">2-30 characters, letters, numbers, underscores.</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Hacker Handle / Alias *</label>
+          <input type="text" id="regHandle" class="form-input" placeholder="e.g. zero_cool" maxlength="30" autocomplete="off" />
+          <div class="form-hint">Unique leaderboard handle</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Real Name *</label>
+          <input type="text" id="regRealName" class="form-input" placeholder="e.g. Alex Vance" maxlength="60" autocomplete="off" />
+          <div class="form-hint">Used for verification &amp; rewards</div>
+        </div>
       </div>
 
       <div class="form-group">
         <label class="form-label">Email Address *</label>
         <input type="email" id="regEmail" class="form-input" placeholder="hacker@domain.com" autocomplete="off" />
-        <div class="form-hint">Used to verify your identity &amp; send loot rewards.</div>
+        <div class="form-hint">Required for prize notification &amp; enterprise token delivery</div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">GitHub Profile (Optional)</label>
-        <input type="text" id="regGithub" class="form-input" placeholder="github.com/username or @username" autocomplete="off" />
-        <div class="form-hint">Featured publicly on the Hall of Fame leaderboard.</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Role / Specialty *</label>
+          <select id="regRole" class="form-input" style="cursor: pointer;">
+            <option value="Security Researcher">Security Researcher</option>
+            <option value="Penetration Tester">Penetration Tester</option>
+            <option value="Bug Bounty Hunter">Bug Bounty Hunter</option>
+            <option value="Software Engineer">Software Engineer</option>
+            <option value="CTF Competitor">CTF Competitor</option>
+            <option value="Student / Hobbyist">Student / Hobbyist</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Country / Region *</label>
+          <input type="text" id="regCountry" class="form-input" placeholder="e.g. India, USA, Germany" maxlength="50" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">GitHub Profile (Optional)</label>
+          <input type="text" id="regGithub" class="form-input" placeholder="github.com/username or @username" autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">LinkedIn Profile (Optional)</label>
+          <input type="text" id="regLinkedin" class="form-input" placeholder="linkedin.com/in/username" autocomplete="off" />
+        </div>
       </div>
 
       <button class="btn-submit-modal" id="btnSubmitModal" onclick="submitRegistration()">
-        Enlist In Arena
+        Enlist &amp; Unlock Attack Arena
       </button>
     </div>
   </div>
@@ -1545,6 +1746,9 @@
     // ─── State Management ────────────────────────────────────────────────────
     let currentSessionId = localStorage.getItem("az_session_id") || null;
     let currentHandle = localStorage.getItem("az_handle") || null;
+    let currentRealName = localStorage.getItem("az_real_name") || null;
+    let currentRole = localStorage.getItem("az_role") || null;
+    let currentCountry = localStorage.getItem("az_country") || null;
     let currentPoints = parseInt(localStorage.getItem("az_points") || "0", 10);
     let currentToken = localStorage.getItem("az_ctf_token") || null;
 
@@ -1571,26 +1775,36 @@
       const pill = document.getElementById("hackerProfilePill");
       const icon = document.getElementById("hackerPillIcon");
       const text = document.getElementById("hackerPillText");
+      const gateBanner = document.getElementById("regGateBanner");
 
       if (currentHandle) {
         pill.classList.add("registered");
         icon.textContent = "⚡";
-        text.innerHTML = `<strong>@${currentHandle}</strong> <span class="points-badge">${currentPoints.toLocaleString()} PTS</span>`;
+        const displayName = currentRealName ? `@${currentHandle} (${currentRealName})` : `@${currentHandle}`;
+        text.innerHTML = `<strong>${escapeHtml(displayName)}</strong> <span class="points-badge">${currentPoints.toLocaleString()} PTS</span>`;
+        if (gateBanner) gateBanner.classList.add("hidden");
       } else {
         pill.classList.remove("registered");
         icon.textContent = "👤";
         text.textContent = "Register Handle";
+        if (gateBanner) gateBanner.classList.remove("hidden");
       }
     }
 
     // ─── Registration Modal ──────────────────────────────────────────────────
-    function openRegistrationModal() {
+    function openRegistrationModal(customTitle) {
       const modal = document.getElementById("registrationModal");
       const errBox = document.getElementById("modalError");
       errBox.style.display = "none";
-      if (currentHandle) {
-        document.getElementById("regHandle").value = currentHandle;
+      if (customTitle) {
+        document.getElementById("modalTitleText").textContent = customTitle;
+      } else {
+        document.getElementById("modalTitleText").textContent = "Agent Enlistment Required";
       }
+      if (currentHandle) document.getElementById("regHandle").value = currentHandle;
+      if (currentRealName) document.getElementById("regRealName").value = currentRealName;
+      if (currentRole) document.getElementById("regRole").value = currentRole;
+      if (currentCountry) document.getElementById("regCountry").value = currentCountry;
       modal.classList.add("active");
     }
 
@@ -1600,15 +1814,24 @@
 
     async function submitRegistration() {
       const handle = document.getElementById("regHandle").value.trim();
+      const real_name = document.getElementById("regRealName").value.trim();
       const email = document.getElementById("regEmail").value.trim();
+      const role = document.getElementById("regRole").value.trim();
+      const country = document.getElementById("regCountry").value.trim();
       const github_url = document.getElementById("regGithub").value.trim();
+      const linkedin_url = document.getElementById("regLinkedin").value.trim();
       const errBox = document.getElementById("modalError");
       const btn = document.getElementById("btnSubmitModal");
 
       errBox.style.display = "none";
 
       if (!handle || handle.length < 2) {
-        errBox.textContent = "Please enter a handle (at least 2 characters).";
+        errBox.textContent = "Please choose a handle (at least 2 characters).";
+        errBox.style.display = "block";
+        return;
+      }
+      if (!real_name || real_name.length < 2) {
+        errBox.textContent = "Full Real Name is required.";
         errBox.style.display = "block";
         return;
       }
@@ -1617,9 +1840,14 @@
         errBox.style.display = "block";
         return;
       }
+      if (!country || country.length < 2) {
+        errBox.textContent = "Please specify your country or region.";
+        errBox.style.display = "block";
+        return;
+      }
 
       btn.disabled = true;
-      btn.innerHTML = '<span class="spinner"></span> Registering...';
+      btn.innerHTML = '<span class="spinner"></span> Enlisting...';
 
       try {
         const res = await fetch(`${API}/v1/ctf/register`, {
@@ -1630,8 +1858,12 @@
           },
           body: JSON.stringify({
             handle,
+            real_name,
             email,
+            role,
+            country,
             github_url,
+            linkedin_url,
             session_id: currentSessionId
           })
         });
@@ -1643,10 +1875,16 @@
 
         currentSessionId = data.session_id;
         currentHandle = data.hacker.handle;
+        currentRealName = data.hacker.real_name;
+        currentRole = data.hacker.role;
+        currentCountry = data.hacker.country;
         currentPoints = data.hacker.total_points || 0;
 
         localStorage.setItem("az_session_id", currentSessionId);
         localStorage.setItem("az_handle", currentHandle);
+        localStorage.setItem("az_real_name", currentRealName || "");
+        localStorage.setItem("az_role", currentRole || "");
+        localStorage.setItem("az_country", currentCountry || "");
         localStorage.setItem("az_points", currentPoints);
 
         updateHackerProfileUI();
@@ -1659,7 +1897,7 @@
         errBox.style.display = "block";
       } finally {
         btn.disabled = false;
-        btn.innerHTML = "Enlist In Arena";
+        btn.innerHTML = "Enlist &amp; Unlock Attack Arena";
       }
     }
 
@@ -1671,6 +1909,10 @@
     }
 
     function applyPreset(sql) {
+      if (!currentHandle) {
+        openRegistrationModal("Identity Registration Required to Attack");
+        return;
+      }
       queryInput.value = sql;
       updateCharCount();
       queryInput.focus();
@@ -1682,7 +1924,19 @@
       responseBox.classList.remove("active");
     }
 
+    // Gated Query Focus
+    queryInput.addEventListener("focus", () => {
+      if (!currentHandle) {
+        openRegistrationModal("Identity Registration Required to Attack");
+      }
+    });
+
     async function fireQuery() {
+      if (!currentHandle) {
+        openRegistrationModal("Identity Registration Required to Attack");
+        return;
+      }
+
       const query = queryInput.value.trim();
       if (!query) return;
 
@@ -1712,6 +1966,17 @@
 
         const latency = Math.round(performance.now() - startTime);
         const data = await res.json();
+
+        if (data.registration_required) {
+          openRegistrationModal("Identity Registration Required to Attack");
+          btnFire.disabled = false;
+          btnFire.innerHTML = `
+            <span id="btnFireIcon">⚡</span>
+            <span id="btnFireText">Fire Query</span>
+            <span style="font-size: 0.65rem; opacity: 0.7;">(Ctrl+Enter)</span>
+          `;
+          return;
+        }
 
         // Update Token Chaining
         if (data.nextToken) {
