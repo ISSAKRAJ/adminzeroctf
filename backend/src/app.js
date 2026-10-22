@@ -205,11 +205,11 @@ async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
   };
 
   try {
-    // ─── LAYER 10: Behavioral Guard (Pre-check) ─────────────────────────────
+    // ─── LAYER 10: Honey Canary & Behavioral Guard (Pre-check) ─────────────
     const tier = getTier(ip);
 
     if (tier >= 3) {
-      return respondBlocked(403, "L10 Behavioral Guard", "BEHAVIORAL_HARD_BAN");
+      return respondBlocked(403, "L10 Honey Canary & Behavioral Guard", "BEHAVIORAL_HARD_BAN");
     }
 
     if (tier >= 2) {
@@ -220,7 +220,7 @@ async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
         handle: alias,
         session_id: clientSessionId,
         ip,
-        layer_targeted: "L10 Behavioral Guard (Shadow Ban)",
+        layer_targeted: "L10 Honey Canary & Behavioral Guard (Shadow Ban)",
         payload: query,
         response_code: 200,
         blocked: true,
@@ -234,30 +234,30 @@ async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
       return res.status(200).json({ ...shadowData, nextToken, points_awarded: 0 });
     }
 
-    // ─── LAYER 11: Challenge Token Validation ───────────────────────────────
+    // ─── LAYER 11: Challenge Token Chaining ─────────────────────────────────
     const challengeCheck = validateToken(ip, challengeToken);
     if (!challengeCheck.valid) {
-      return respondBlocked(403, "L11 Challenge Token", challengeCheck.reason || "LAYER_11_CHALLENGE_FAILED");
+      return respondBlocked(403, "L11 Challenge Token Chaining", challengeCheck.reason || "LAYER_11_CHALLENGE_FAILED");
     }
 
     // Fresh token for next query
     const nextToken = issueToken(ip, reqId);
     res.setHeader("X-Next-Token", nextToken);
 
-    // ─── LAYER 0: Input Sanitization ─────────────────────────────────────────
+    // ─── LAYER 4: Query Normalization & Pre-validation ──────────────────────
     if (!query || typeof query !== "string") {
-      return respondBlocked(400, "L0 Input Sanitization", "LAYER_0: No query provided.");
+      return respondBlocked(400, "L4 Query Normalizer", "LAYER_4_EMPTY: No query string provided.");
     }
 
     if (query.length > 500) {
-      return respondBlocked(400, "L0 Input Sanitization", "LAYER_0: Query exceeds 500 characters.");
+      return respondBlocked(400, "L4 Query Normalizer", "LAYER_4_LENGTH: Query exceeds 500 characters limit.");
     }
 
     if (/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(query)) {
-      return respondBlocked(400, "L0 Input Sanitization", "LAYER_0: Query contains forbidden control characters.");
+      return respondBlocked(400, "L4 Query Normalizer", "LAYER_4_CONTROL_CHARS: Query contains forbidden control characters.");
     }
 
-    // ─── LAYER 12: Query Normalization ───────────────────────────────────────
+    // Canonicalize whitespace, remove invisible zero-width chars and homoglyphs
     const normalizedQuery = normalizeQuery(query);
 
     // ─── LAYER 2: Encoding Obfuscation Detection ────────────────────────────
@@ -272,7 +272,7 @@ async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
       return respondBlocked(403, "L3 Keyword Blacklist", bl.reason);
     }
 
-    // ─── LAYERS 4, 5, 6, 7, 9: AST Guard ────────────────────────────────────
+    // ─── LAYERS 5, 6, 7, 8, 9: AST Analysis, Complexity & Semantic Guard ────
     let ast;
     try {
       ast = validateAST(normalizedQuery);
@@ -281,15 +281,22 @@ async function processQuery(req, res, { isCtfEndpoint = false } = {}) {
     }
 
     if (!ast.valid) {
-      let layerName = "L6 Intent Validation";
-      if (ast.reason && ast.reason.includes("LAYER_4")) layerName = "L4 Complexity Scorer";
-      else if (ast.reason && ast.reason.includes("LAYER_5")) layerName = "L5 AST Parse";
-      else if (ast.reason && ast.reason.includes("LAYER_7")) layerName = "L7 Query Reconstructor";
-      else if (ast.reason && ast.reason.includes("LAYER_9")) layerName = "L9 SQL Tokenizer";
+      let layerName = "L7 Intent & Semantic";
+      if (ast.reason && (ast.reason.includes("LAYER_4") || ast.reason.includes("Depth limit exceeded"))) {
+        layerName = "L6 Complexity Scorer";
+      } else if (ast.reason && ast.reason.includes("LAYER_5")) {
+        layerName = "L5 AST Parse";
+      } else if (ast.reason && ast.reason.includes("LAYER_6")) {
+        layerName = "L7 Intent & Semantic";
+      } else if (ast.reason && ast.reason.includes("LAYER_7")) {
+        layerName = "L8 Query Reconstructor";
+      } else if (ast.reason && ast.reason.includes("LAYER_9")) {
+        layerName = "L9 Shannon Entropy & Tokenizer";
+      }
       return respondBlocked(403, layerName, ast.reason);
     }
 
-    // ─── Execution Phase (Reconstructed SQL Only) ────────────────────────────
+    // ─── Execution Phase (Reconstructed SQL Only & L12 PII Scrubbing) ────────
     const rawRows = runSafeQuery(ast.safeQuery);
     const rows = scrubRows(rawRows);
 

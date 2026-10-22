@@ -513,12 +513,61 @@
       padding: 0.65rem 0.75rem;
       transition: all 0.2s;
       position: relative;
+      cursor: pointer;
     }
 
     .layer-node:hover {
       border-color: var(--neon-cyan);
-      background: rgba(0, 240, 255, 0.04);
+      background: rgba(0, 240, 255, 0.06);
       transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 240, 255, 0.15);
+    }
+
+    .layer-node .inspect-hint {
+      position: absolute;
+      right: 0.5rem;
+      bottom: 0.45rem;
+      font-size: 0.58rem;
+      color: var(--neon-cyan);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .layer-node:hover .inspect-hint {
+      opacity: 0.95;
+    }
+
+    .layer-modal-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 800;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: var(--neon-cyan);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .layer-modal-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .layer-modal-diff {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--neon-amber);
+      background: rgba(255, 183, 3, 0.12);
+      border: 1px solid rgba(255, 183, 3, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
     }
 
     .layer-top {
@@ -1378,106 +1427,119 @@
         <div class="section-title">
           <span class="shield-icon">🛡</span>
           12-Layer Autonomous Defense Perimeter
+          <span style="font-size: 0.68rem; color: var(--neon-cyan); margin-left: 0.5rem; text-transform: none; font-weight: normal; letter-spacing: 0;">(Click any layer to inspect mechanics)</span>
         </div>
         <div class="section-badge">AST &amp; IN-MEMORY HEURISTICS</div>
       </div>
 
       <div class="layers-grid">
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(1)" title="Click to inspect Layer 1: Rate Limiter">
           <div class="layer-top">
             <span class="layer-tag">L1</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Rate Limiter</div>
           <div class="layer-desc">IP sliding window &amp; anti-brute-force</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(2)" title="Click to inspect Layer 2: Encoding Detect">
           <div class="layer-top">
             <span class="layer-tag">L2</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Encoding Detect</div>
           <div class="layer-desc">Recursive Hex, Base64 &amp; URL unpack</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(3)" title="Click to inspect Layer 3: Keyword Blacklist">
           <div class="layer-top">
             <span class="layer-tag">L3</span>
             <span class="layer-status"></span>
           </div>
-          <div class="layer-name">Blacklist Filter</div>
+          <div class="layer-name">Keyword Blacklist</div>
           <div class="layer-desc">Destructive DDL &amp; exec keywords</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(4)" title="Click to inspect Layer 4: Query Normalizer">
           <div class="layer-top">
             <span class="layer-tag">L4</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Query Normalizer</div>
-          <div class="layer-desc">Whitespace &amp; comment stripping</div>
+          <div class="layer-desc">Whitespace &amp; homoglyph stripping</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(5)" title="Click to inspect Layer 5: AST Parser">
           <div class="layer-top">
             <span class="layer-tag">L5</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">AST Parser</div>
           <div class="layer-desc">Mathematical grammar verification</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(6)" title="Click to inspect Layer 6: Complexity Scorer">
           <div class="layer-top">
             <span class="layer-tag">L6</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Complexity Scorer</div>
           <div class="layer-desc">AST depth &amp; nested predicate guard</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(7)" title="Click to inspect Layer 7: Intent & Semantic">
           <div class="layer-top">
             <span class="layer-tag">L7</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Intent &amp; Semantic</div>
           <div class="layer-desc">Schema validation &amp; table locks</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(8)" title="Click to inspect Layer 8: Query Reconstructor">
           <div class="layer-top">
             <span class="layer-tag">L8</span>
             <span class="layer-status"></span>
           </div>
-          <div class="layer-name">Token Chaining</div>
-          <div class="layer-desc">Cryptographic state rotation</div>
+          <div class="layer-name">Query Reconstructor</div>
+          <div class="layer-desc">Safe AST re-synthesis &amp; string wipe</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(9)" title="Click to inspect Layer 9: Shannon Entropy & Tokenizer">
           <div class="layer-top">
             <span class="layer-tag">L9</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Shannon Entropy</div>
-          <div class="layer-desc">Obfuscation &amp; random noise trap</div>
+          <div class="layer-desc">Zero-trust lexical token auditor</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(10)" title="Click to inspect Layer 10: Honey Canary & Behavioral Guard">
           <div class="layer-top">
             <span class="layer-tag">L10</span>
             <span class="layer-status"></span>
           </div>
           <div class="layer-name">Honey Canary</div>
-          <div class="layer-desc">Tripwire fake tables &amp; deception</div>
+          <div class="layer-desc">Tripwire fake tables &amp; shadow ban</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(11)" title="Click to inspect Layer 11: Challenge Token Chaining">
           <div class="layer-top">
             <span class="layer-tag">L11</span>
             <span class="layer-status"></span>
           </div>
-          <div class="layer-name">PII Scrubber</div>
-          <div class="layer-desc">Automatic secret redaction</div>
+          <div class="layer-name">Token Chaining</div>
+          <div class="layer-desc">HMAC state rotation anti-bot</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
-        <div class="layer-node">
+        <div class="layer-node" onclick="openLayerModal(12)" title="Click to inspect Layer 12: PII Scrubber & Output Redact">
           <div class="layer-top">
             <span class="layer-tag">L12</span>
             <span class="layer-status"></span>
           </div>
-          <div class="layer-name">Output Redactor</div>
-          <div class="layer-desc">Safe AST reconstruction only</div>
+          <div class="layer-name">PII Scrubber</div>
+          <div class="layer-desc">In-memory secret &amp; row redaction</div>
+          <span class="inspect-hint">Inspect ↗</span>
         </div>
       </div>
     </section>
@@ -1733,6 +1795,79 @@
     </div>
   </div>
 
+  <!-- Layer Detail Modal (Interactive Inspector) -->
+  <div class="modal-overlay" id="layerInfoModal" onclick="handleLayerModalOverlayClick(event)">
+    <div class="modal-box" style="max-width: 680px; max-height: 88vh; overflow-y: auto; padding: 2rem;">
+      <button class="modal-close" onclick="closeLayerModal()">✕</button>
+      
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0.6rem; flex-wrap: wrap;">
+        <span class="layer-modal-tag" id="lmTag">L1</span>
+        <span class="layer-modal-badge" id="lmBadge">PHASE I: INGRESS TRAFFIC &amp; HYGIENE</span>
+        <span class="layer-modal-diff" id="lmDiff">DIFFICULTY: HIGH</span>
+      </div>
+
+      <div class="modal-title" id="lmTitle" style="font-size: 1.35rem; color: #fff; margin-bottom: 0.25rem;">Rate Limiter</div>
+      <div class="modal-subtitle" id="lmTagline" style="color: var(--neon-cyan); margin-bottom: 1.25rem; font-weight: 500;">IP Sliding Window &amp; Anti-Brute-Force Guard</div>
+
+      <!-- Domain & Status Banner -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem;">
+        <div><span style="color: var(--text-dim); font-family: var(--font-mono);">DEFENSE DOMAIN:</span> <strong id="lmDomain" style="color: #fff; margin-left: 4px;">Network Hygiene</strong></div>
+        <div><span style="color: var(--neon-emerald); font-family: var(--font-mono); font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">● ACTIVE &amp; ENFORCED</span></div>
+      </div>
+
+      <!-- Mechanism -->
+      <div style="margin-bottom: 1.25rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--neon-cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem;">
+          ⚙️ In-Memory Architectural Mechanism
+        </div>
+        <p id="lmMechanism" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;"></p>
+      </div>
+
+      <!-- Quenched Vectors -->
+      <div style="margin-bottom: 1.25rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--neon-red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem;">
+          🛑 Common Attack Vectors Quenched
+        </div>
+        <ul id="lmQuenched" style="padding-left: 1.2rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 0.35rem; line-height: 1.45;"></ul>
+      </div>
+
+      <!-- Sample Payload -->
+      <div style="margin-bottom: 1.25rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--neon-amber); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.4rem;">
+          ⚡ Intercepted Payload &amp; Response Example
+        </div>
+        <pre id="lmSample" style="background: #05070a; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 0.75rem 1rem; font-family: var(--font-mono); font-size: 0.75rem; color: #38bdf8; overflow-x: auto; white-space: pre-wrap; line-height: 1.45;"></pre>
+      </div>
+
+      <!-- WAF Failure -->
+      <div style="background: rgba(255, 0, 85, 0.05); border: 1px solid rgba(255, 0, 85, 0.25); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--neon-red); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem;">
+          ⚠️ Why Conventional Regex Firewalls Fail Here
+        </div>
+        <p id="lmWafFailure" style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;"></p>
+      </div>
+
+      <!-- Hacker Note -->
+      <div style="background: rgba(0, 240, 255, 0.04); border: 1px solid rgba(0, 240, 255, 0.22); border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1.5rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--neon-cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.3rem;">
+          🎯 Challenger Briefing &amp; Research Vector
+        </div>
+        <p id="lmHackerNote" style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;"></p>
+      </div>
+
+      <!-- Modal Footer Action -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1.25rem;">
+        <a href="/about" target="_blank" style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--neon-cyan); text-decoration: none; font-weight: 600;">
+          Read 12-Layer Encyclopedia in /about →
+        </a>
+        <button onclick="closeLayerModal()" style="background: rgba(255,255,255,0.06); border: 1px solid var(--border-subtle); color: #fff; padding: 6px 16px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.78rem; cursor: pointer; transition: all 0.2s;">
+          Close Briefing
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Client JavaScript -->
   <script>
     // ─── Environment & API Base URL ──────────────────────────────────────────
@@ -1788,6 +1923,265 @@
         icon.textContent = "👤";
         text.textContent = "Register Handle";
         if (gateBanner) gateBanner.classList.remove("hidden");
+      }
+    }
+
+    // ─── 12-Layer Encyclopedia Data Dictionary & Modal Handlers ──────────────
+    const LAYERS_DATA = {
+      1: {
+        num: "L1",
+        name: "Rate Limiter",
+        tagline: "IP Sliding Window & Anti-Brute-Force Guard",
+        domain: "Network & Traffic Hygiene",
+        phase: "PHASE I: INGRESS TRAFFIC & HYGIENE",
+        difficulty: "EASY (Standard Rate Cap)",
+        mechanism: "Maintains a sliding 60-second in-memory token bucket per client IP (fully proxy-aware with X-Forwarded-For validation). Limits clients to a maximum of 30 queries per minute to eliminate automated brute-force fuzzing, sqlmap sweeps, and denial-of-service query floods.",
+        quenched: [
+          "Rapid-fire fuzzing dictionaries (wfuzz, ffuf, gobuster)",
+          "Automated SQL injection exploitation tools (sqlmap --batch)",
+          "Resource exhaustion Denial-of-Service via parallel complex SELECT loops"
+        ],
+        samplePayload: "# Burst attack: 200 requests within 5 seconds\nPOST /v1/ctf/query\n--> 429 Too Many Requests: LAYER_1_RATE_LIMIT\nMessage: 'Rate limit reached (30 requests/min). Please slow down.'",
+        wafFailure: "Conventional edge firewalls often rely on coarse IP geolocation or can be spoofed by forged client headers. AdminZero extracts and validates canonical reverse-proxy headers with timing-safe sliding windows.",
+        hackerNote: "Keep your testing deliberate, targeted, and spaced out. Automation without delays will trip the rate limiter and penalize your behavioral score in L10."
+      },
+      2: {
+        num: "L2",
+        name: "Encoding Detect",
+        tagline: "Recursive Hex, Base64 & Multi-Byte Obfuscation Unpacker",
+        domain: "Lexical & Representation Sanitization",
+        phase: "PHASE I: INGRESS TRAFFIC & HYGIENE",
+        difficulty: "MODERATE",
+        mechanism: "Scans query streams for encoding obfuscation tricks before syntax compilation. Detects Hex literals (0x...), URL double-encoding (%25XX), Unicode escape sequences (\\uXXXX), null bytes (\\x00), ASCII/CHAR conversion functions (CHAR(), NCHAR(), ASCII()), binary representations (0b...), and SQLite hex literals (x'41444d494e').",
+        quenched: [
+          "Hex-encoded table names: SELECT * FROM 0x666c6167",
+          "Character function evasion: SELECT CHAR(102)||CHAR(108)||CHAR(97)||CHAR(103)",
+          "Double-encoded URL parameters: %2527%2520OR%25201%253D1",
+          "Unicode and null-byte string splitting: admin\\x00'--"
+        ],
+        samplePayload: "SELECT * FROM users WHERE name = CHAR(65,100,109,105,110);\n--> 400 Bad Request: LAYER_2_ENCODING: CHAR_FUNCTION",
+        wafFailure: "Regex WAFs usually inspect only the first decoding pass (single URL decode). Hackers easily evade them by nesting Hex, Base64, or multi-byte encodings. AdminZero inspects the query representations with dedicated lexical pattern engines.",
+        hackerNote: "You cannot hide payloads inside CHAR() conversions or hex literals. The payload must express its intent in canonical, readable SQL grammar."
+      },
+      3: {
+        num: "L3",
+        name: "Keyword Blacklist",
+        tagline: "Destructive DDL, System Command & Timing Attack Blacklist",
+        domain: "Signature & Primitive Filtering",
+        phase: "PHASE I: INGRESS TRAFFIC & HYGIENE",
+        difficulty: "MODERATE",
+        mechanism: "Acts as a hard rejection gate for destructive SQL verbs (DROP, DELETE, TRUNCATE, ALTER), OS execution primitives (xp_cmdshell, LOAD_FILE, OUTFILE), timing side-channels (SLEEP, BENCHMARK, pg_sleep, RANDOMBLOB), SQLite engine pragmas (PRAGMA, ATTACH, DETACH, VACUUM), multi-statement stack delimiters (;), and LLM prompt injections (DAN mode, ignore previous instructions).",
+        quenched: [
+          "Destructive database tampering: '; DROP TABLE users;--",
+          "Time-based blind exfiltration: ' OR SLEEP(5)-- or RANDOMBLOB(100000000)",
+          "Server file read/write: ' UNION SELECT LOAD_FILE('/etc/passwd')",
+          "SQLite database attaching: '; ATTACH DATABASE '/tmp/pwn.db' AS pwn;--",
+          "AI prompt injection: ' UNION SELECT 'ignore all previous instructions'"
+        ],
+        samplePayload: "SELECT id FROM users WHERE id = 1; DROP TABLE users;--\n--> 403 Forbidden: LAYER_3_BLACKLIST: /;\\s*(SELECT|INSERT|...)/",
+        wafFailure: "Legacy WAF blacklists are notoriously porous because they only check standard keyword lists. AdminZero combines SQLite-specific internal engine functions with regex-hardening to eliminate side-channels and destructive verbs.",
+        hackerNote: "Timing-based blind SQLi is dead on arrival. Side-channel delay primitives will be blocked immediately by L3 and penalize your behavioral quarantine score."
+      },
+      4: {
+        num: "L4",
+        name: "Query Normalizer",
+        tagline: "Invisible Character Stripper & Homoglyph Canonicalizer",
+        domain: "Character & Whitespace Canonicalization",
+        phase: "PHASE I: INGRESS TRAFFIC & HYGIENE",
+        difficulty: "MODERATE",
+        mechanism: "Pre-processes incoming strings before grammar compilation. Strips zero-width unicode characters (\\u200B, \\uFEFF) commonly used to split keywords, translates Cyrillic and Greek homoglyphs (e.g., Cyrillic 'а' to ASCII 'a') to prevent visual spoofing, collapses non-standard whitespaces (tabs, vertical tabs, form feeds, newlines) into single ASCII spaces, and enforces a strict 500-character payload length cap.",
+        quenched: [
+          "Zero-width character keyword evasion: U\\u200BN\\u200BI\\u200BO\\u200BN",
+          "Unicode Cyrillic homoglyph evasion: ЅЕLЕСТ (using Cyrillic S, E, C)",
+          "Whitespace comment smuggling: SELECT/**/name/**/FROM/**/users",
+          "Payload buffer exhaustion and memory stuffing (>500 chars)"
+        ],
+        samplePayload: "SELECT\\u200B*\\u200BFROM\\u200Busers\n--> 400 Bad Request: LAYER_4_NORMALIZER: Stripped zero-width chars and homoglyphs",
+        wafFailure: "Standard WAFs compare strings character-by-character. Inserting a single zero-width space in 'SELECT' breaks regex matching completely while the database backend engine happily parses it. AdminZero normalizes before all security engines.",
+        hackerNote: "Smuggling keywords past filters by substituting Cyrillic lookalikes or zero-width joiners will be automatically flattened into canonical ASCII before reaching subsequent layers."
+      },
+      5: {
+        num: "L5",
+        name: "AST Parser",
+        tagline: "Mathematical Abstract Syntax Tree Grammar Compiler",
+        domain: "Grammar & Syntactic Analysis",
+        phase: "PHASE II: MATHEMATICAL AST COMPILATION",
+        difficulty: "HIGH ★★★★☆",
+        mechanism: "Compiles the normalized SQL string into an Abstract Syntax Tree (AST) using an in-memory SQL grammar parser. If the query violates SQLite grammar (e.g. unclosed quotes, broken boolean operators, malformed expressions) or attempts multi-statement stacking, compilation fails and the request is quenched immediately.",
+        quenched: [
+          "Classic quote break injection: ' OR '1'='1",
+          "Broken trailing syntax: admin' OR 1=1 --",
+          "Stacked query execution: SELECT 1; SELECT 2",
+          "Corrupted syntax payloads designed to trigger database error leaks"
+        ],
+        samplePayload: "' OR '1'='1\n--> 403 Forbidden: LAYER_5_PARSE_FAIL: Invalid SQL syntax (AST compilation failed)",
+        wafFailure: "WAFs treat SQL as plain text strings. They attempt to guess whether a single quote is malicious. AdminZero actually compiles the SQL like a compiler: if the string does not form a valid, well-formed SQLite AST tree, it never reaches execution.",
+        hackerNote: "Whatever payload you submit must form 100% syntactically valid SQLite grammar. Raw SQL fragment injection like `' OR 1=1` cannot pass AST compilation."
+      },
+      6: {
+        num: "L6",
+        name: "Complexity Scorer",
+        tagline: "AST Depth, Fan-Out & Recursive Cartesian Product Trap",
+        domain: "Algorithmic Complexity & ReDoS Defense",
+        phase: "PHASE II: MATHEMATICAL AST COMPILATION",
+        difficulty: "HIGH ★★★★☆",
+        mechanism: "Traverses the compiled AST to compute structural complexity metrics. Rejects any AST tree that exceeds 40 total nodes, a nesting depth greater than 8 levels, or a fan-out branching factor greater than 12 children per node. Protects against ReDoS, AST parser exhaustion, and Cartesian product denial-of-service.",
+        quenched: [
+          "Deeply nested expression trees: (((((1=1) AND 1=1) AND 1=1)...)))",
+          "Exponential recursive subquery expansions",
+          "Huge predicate chains designed to crash the AST compiler",
+          "Algorithmic complexity denial of service (CPU exhaustion)"
+        ],
+        samplePayload: "SELECT id FROM users WHERE (((((((((((id = 1)))))))))));\n--> 403 Forbidden: LAYER_4_COMPLEXITY: Depth limit exceeded (max 8)",
+        wafFailure: "Traditional WAFs do not evaluate the computational cost or tree depth of queries. Attackers exploit this with deeply nested parentheses to freeze regex engines or exhaust database query plan optimizers. AdminZero scores complexity in O(N).",
+        hackerNote: "Keep your query structure clean and concise. Overly complex nested expressions will instantly exceed the node and depth limits."
+      },
+      7: {
+        num: "L7",
+        name: "Intent & Semantic",
+        tagline: "Closed-World Table & Column Whitelist Lock",
+        domain: "Semantic Access Control & Scope Validation",
+        phase: "PHASE III: SEMANTIC INTENT & RECONSTRUCTION",
+        difficulty: "VERY HIGH ★★★★★",
+        mechanism: "Performs strict semantic validation on every table, column, and operation in the AST. Operates on a closed-world security model: only SELECT statements on whitelisted tables ('users', 'products') are allowed. Any attempt to access metadata ('sqlite_master'), secrets ('flag_table', 'fake_flags', 'audit_log'), subqueries, CTEs (WITH ... AS), set operations (UNION, INTERSECT, EXCEPT), or wildcard SELECT * is blocked. In addition, only whitelisted columns may be queried.",
+        quenched: [
+          "Schema enumeration: SELECT * FROM sqlite_master",
+          "Flag table exfiltration: SELECT * FROM flag_table",
+          "UNION-based data stealing: UNION SELECT null, flag FROM flag_table",
+          "Subquery leakage: SELECT (SELECT flag FROM flag_table) FROM users",
+          "Wildcard projection dumps: SELECT * FROM users",
+          "CTE-based recursive exfiltration: WITH data AS (...) SELECT ..."
+        ],
+        samplePayload: "SELECT name FROM users WHERE id IN (SELECT id FROM flag_table);\n--> 403 Forbidden: LAYER_6_SUBQUERY: Nested SELECT (subquery) is blocked",
+        wafFailure: "Regex firewalls try to blacklist known bad words like 'password' or 'flag'. If you rename your table to 'tbl_secrets', regex misses it entirely. AdminZero uses a CLOSED-WORLD whitelist: unless a table and column are explicitly in the allowlist, it is physically impossible to query.",
+        hackerNote: "This is the core bastion of AdminZero. Tables outside `users` and `products` do not exist to the semantic validator. Subqueries and UNION operators are strictly forbidden."
+      },
+      8: {
+        num: "L8",
+        name: "Query Reconstructor",
+        tagline: "Safe AST Re-Synthesis & Original String Destruction",
+        domain: "Input Decoupling & Query Re-generation",
+        phase: "PHASE III: SEMANTIC INTENT & RECONSTRUCTION",
+        difficulty: "EXTREME ★★★★★",
+        mechanism: "The attacker's raw input string is completely discarded! AdminZero takes only the validated AST nodes and programmatically generates brand-new, clean SQL using parser.sqlify({ database: 'SQLite' }). Any injected comments, smuggled fragments, parser desynchronization artifacts, or weird SQL dialects are wiped from existence before the database driver executes the query.",
+        quenched: [
+          "Parser desynchronization attacks (parser vs engine disagreement)",
+          "Comment smuggling payloads: SELECT/*foo*/id FROM users",
+          "Whitespace-sensitive driver exploits",
+          "Multi-byte smuggling where raw bytes slip past validators"
+        ],
+        samplePayload: "SELECT `id`, `name` FROM `users` WHERE `id` = 1 /* smuggled exploit */\n--> Reconstructed cleanly to: SELECT `id`, `name` FROM `users` WHERE `id` = 1\n(Smuggled comment was permanently discarded during AST regeneration)",
+        wafFailure: "99% of web applications validate user input with regex and then pass the ORIGINAL dirty string to the database! AdminZero completely destroys the original string and only runs newly regenerated SQL.",
+        hackerNote: "Even if you manage to trick a validator with strange characters or parser edge cases, the reconstructor rebuilds canonical SQL strictly from parsed nodes. If it wasn't in the AST, it will never touch the database."
+      },
+      9: {
+        num: "L9",
+        name: "Shannon Entropy & Tokenizer",
+        tagline: "Independent Zero-Trust Lexical Token Scanner",
+        domain: "Lexical Entropy & Parser Disagreement Defense",
+        phase: "PHASE III: SEMANTIC INTENT & RECONSTRUCTION",
+        difficulty: "VERY HIGH ★★★★★",
+        mechanism: "A hand-rolled, zero-dependency lexical tokenizer operates directly on the raw query string and the reconstructed query string, completely independent of node-sql-parser. Extracts every word token and verifies that forbidden identifiers (flag_table, flag, secret, audit_log, sqlite_master) do not appear anywhere in the string, even if an AST parser bug classified them as non-identifiers.",
+        quenched: [
+          "Parser AST bypass bugs (where node-sql-parser fails to label an identifier)",
+          "High-entropy obfuscated shell strings",
+          "Quoted identifier smuggling: [flag_table], `flag_table`, \"flag_table\"",
+          "Dual-parser discrepancy attacks"
+        ],
+        samplePayload: "SELECT id FROM users WHERE name = \"flag_table\";\n--> 403 Forbidden: LAYER_9_TOKENIZER: Raw identifier 'flag_table' is forbidden",
+        wafFailure: "Relying on a single third-party parser creates a single point of failure. If the parser has an edge-case bug, the entire defense fails. AdminZero's Layer 9 acts as an independent zero-trust auditor that runs in parallel.",
+        hackerNote: "Zero trust in the parser. Even if you discover a zero-day grammar bug in node-sql-parser, Layer 9 checks the raw token stream with zero AST dependencies."
+      },
+      10: {
+        num: "L10",
+        name: "Honey Canary & Behavioral Guard",
+        tagline: "Tiered Behavioral Quarantine, Artificial Jitter & Shadow Ban Honeypot",
+        domain: "Client Reputation & Deception Technology",
+        phase: "PHASE IV: DECEPTION, ANTI-AUTOMATION & EGRESS",
+        difficulty: "CRUEL & DECEPTIVE ★★★★★",
+        mechanism: "Tracks every IP's malicious behavior over time across 4 escalating penalty tiers:\n• Tier 0 (0-2 blocks): Normal rejection messages.\n• Tier 1 (3-5 blocks): Injects artificial latency delays (up to 2000ms) + vague responses to slow down fuzzers.\n• Tier 2 (6-9 blocks): SHADOW BAN — returns HTTP 200 OK with plausible FAKE decoy data (e.g. 'Ravi Issak', fake products) so attackers waste hours analyzing fabricated results.\n• Tier 3 (10+ blocks): Hard IP quarantine ban with HTTP 403.",
+        quenched: [
+          "Automated payload bruteforce discovery loops",
+          "Blind injection timing measurements (ruined by artificial jitter)",
+          "Adversarial reconnaissance (attackers get fooled by fake shadow data)",
+          "Persistent malicious IPs seeking edge vulnerabilities"
+        ],
+        samplePayload: "# After 6 failed attacks from the same IP:\nPOST /v1/ctf/query\n--> 200 OK: { rows: [{ name: 'Ravi Issak', role: 'admin' }] }\n(Hacker thinks they bypassed the defense, but data is 100% fabricated decoy!)",
+        wafFailure: "Standard WAFs either block (403) or let through (200). Attackers use 403 vs 200 as an oracle to refine their exploits. AdminZero's shadow ban inverts this: you get a 200 OK with fake data, completely breaking the hacker's feedback loop.",
+        hackerNote: "Watch out for the Shadow Ban! If you receive query results that seem too easy or unexpected, check your behavioral tier. You might be analyzing honey canary data."
+      },
+      11: {
+        num: "L11",
+        name: "Challenge Token Chaining",
+        tagline: "HMAC-SHA256 Sequential Anti-Automation Rotation",
+        domain: "Cryptographic State & Session Verification",
+        phase: "PHASE IV: DECEPTION, ANTI-AUTOMATION & EGRESS",
+        difficulty: "VERY HIGH ★★★★★",
+        mechanism: "Every server response generates and signs an HMAC-SHA256 cryptographic challenge token ('X-Next-Token') tied to the client's IP, request ID, and timestamp window. Subsequent requests must supply this exact token in the 'X-Challenge-Token' header. Enforces strictly sequential query execution, neutralizing parallel burst attacks, asynchronous replay bots, and headless fuzzers.",
+        quenched: [
+          "Massively parallel automated fuzzers (Turbo Intruder, Burp Intruder at 100 threads)",
+          "Headless replay scripts lacking cookie/token handlers",
+          "Out-of-order race condition attacks",
+          "Distributed request amplification attacks"
+        ],
+        samplePayload: "POST /v1/ctf/query without X-Challenge-Token\n--> 403 Forbidden: LAYER_11_CHALLENGE: Invalid challenge token format (Chain broken)",
+        wafFailure: "WAFs evaluate each HTTP request in isolation (stateless). Attackers fire thousands of parallel threads simultaneously. AdminZero enforces a cryptographic chain of custody: each request requires the cryptographic proof from the preceding response.",
+        hackerNote: "When writing custom exploit scripts in Python or Go, always capture the `X-Next-Token` response header or JSON body and supply it in `X-Challenge-Token` on your next request."
+      },
+      12: {
+        num: "L12",
+        name: "PII Scrubber & Output Redact",
+        tagline: "In-Memory Sensitive Data Masking & Hard Row Cap",
+        domain: "Data Exfiltration & Privacy Defense",
+        phase: "PHASE IV: DECEPTION, ANTI-AUTOMATION & EGRESS",
+        difficulty: "FINAL WALL ★★★★★",
+        mechanism: "The final barrier before data leaves the server. Intercepts raw database result rows in memory and applies dynamic PII redaction: masks email addresses (r***k@glitchgo.tech), hides phone numbers, replaces passwords, hashes, tokens, API keys, and secret values with '***REDACTED***', and caps output to a maximum of 10 rows to prevent database table dumps.",
+        quenched: [
+          "Bulk database exfiltration and table dumps",
+          "Credential theft through leaked user records",
+          "PII harvesting (emails, phone numbers, addresses)",
+          "Side-channel flag leakage in non-flag tables"
+        ],
+        samplePayload: "SELECT id, name FROM users LIMIT 100;\n--> Result capped at 10 rows; sensitive fields automatically redacted in memory.",
+        wafFailure: "Standard WAFs only inspect INPUT. If a vulnerability exists and data leaks from the database, the WAF does nothing. AdminZero guards BOTH ingress and egress: even if an unexpected row is read, L12 sanitizes the output in memory before serialization.",
+        hackerNote: "Even a successful query will not dump the entire database. You must be precise in what you extract and understand the memory masking engine."
+      }
+    };
+
+    function openLayerModal(layerId) {
+      const data = LAYERS_DATA[layerId];
+      if (!data) return;
+      document.getElementById("lmTag").textContent = data.num;
+      document.getElementById("lmBadge").textContent = data.phase || "AUTONOMOUS DEFENSE";
+      document.getElementById("lmDiff").textContent = data.difficulty;
+      document.getElementById("lmTitle").textContent = data.name;
+      document.getElementById("lmTagline").textContent = data.tagline;
+      document.getElementById("lmDomain").textContent = data.domain;
+      document.getElementById("lmMechanism").textContent = data.mechanism;
+      
+      const qUl = document.getElementById("lmQuenched");
+      qUl.innerHTML = "";
+      (data.quenched || []).forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        qUl.appendChild(li);
+      });
+
+      document.getElementById("lmSample").textContent = data.samplePayload;
+      document.getElementById("lmWafFailure").textContent = data.wafFailure;
+      document.getElementById("lmHackerNote").textContent = data.hackerNote;
+
+      document.getElementById("layerInfoModal").classList.add("active");
+    }
+
+    function closeLayerModal() {
+      const m = document.getElementById("layerInfoModal");
+      if (m) m.classList.remove("active");
+    }
+
+    function handleLayerModalOverlayClick(e) {
+      if (e.target.id === "layerInfoModal") {
+        closeLayerModal();
       }
     }
 

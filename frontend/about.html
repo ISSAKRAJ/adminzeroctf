@@ -304,6 +304,142 @@
       line-height: 1.4;
     }
 
+    /* ─── 12-Layer Encyclopedia Section Styles ─── */
+    .encyclopedia-phase {
+      margin-top: 2.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .phase-title {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--neon-cyan);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .phase-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .layer-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .layer-card:hover {
+      border-color: rgba(0, 240, 255, 0.35);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    .layer-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .layer-pill-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 800;
+      background: rgba(0, 240, 255, 0.15);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      color: var(--neon-cyan);
+      padding: 2px 10px;
+      border-radius: 6px;
+    }
+
+    .layer-diff-pill {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--neon-amber);
+      background: rgba(255, 183, 3, 0.12);
+      border: 1px solid rgba(255, 183, 3, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .layer-title-text {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.3rem;
+    }
+
+    .layer-tagline-text {
+      font-size: 0.88rem;
+      color: var(--neon-cyan);
+      font-family: var(--font-mono);
+      margin-bottom: 1rem;
+    }
+
+    .layer-grid-2 {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 800px) {
+      .layer-grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .layer-box-sub {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+
+    .layer-box-sub-title {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .code-preview {
+      background: #05070a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: #38bdf8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      line-height: 1.45;
+    }
+
     /* CTA Section */
     .cta-banner {
       background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 85, 0.1));
@@ -440,67 +576,483 @@
       </p>
 
       <div class="stack-grid">
-        <div class="stack-item">
+        <a href="#l1" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 01</div>
           <div class="stack-name">Rate Limiter</div>
           <div class="stack-desc">Dynamic sliding-window IP throttling and anti-brute-force defense.</div>
-        </div>
-        <div class="stack-item">
+        </a>
+        <a href="#l2" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 02</div>
-          <div class="stack-name">Encoding Detector</div>
+          <div class="stack-name">Encoding Detect</div>
           <div class="stack-desc">Recursive decoding of Hex, Base64, URL-double encode, and unicode tricks.</div>
-        </div>
-        <div class="stack-item">
+        </a>
+        <a href="#l3" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 03</div>
           <div class="stack-name">Keyword Blacklist</div>
           <div class="stack-desc">Instant rejection of destructive DDL, schema alteration, and OS execution primitives.</div>
-        </div>
-        <div class="stack-item">
+        </a>
+        <a href="#l4" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 04</div>
           <div class="stack-name">Query Normalizer</div>
-          <div class="stack-desc">Strips obfuscation comments, variable whitespaces, and noise tokens.</div>
-        </div>
-        <div class="stack-item">
+          <div class="stack-desc">Strips obfuscation comments, variable whitespaces, and homoglyphs.</div>
+        </a>
+        <a href="#l5" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 05</div>
           <div class="stack-name">AST Parser</div>
           <div class="stack-desc">Compiles SQL into an Abstract Syntax Tree. Rejects unparseable injection grammar.</div>
-        </div>
-        <div class="stack-item">
+        </a>
+        <a href="#l6" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 06</div>
           <div class="stack-name">Complexity Scorer</div>
           <div class="stack-desc">Evaluates AST depth, Cartesian joins, and nested subquery recursion traps.</div>
-        </div>
-        <div class="stack-item">
+        </a>
+        <a href="#l7" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 07</div>
           <div class="stack-name">Intent &amp; Semantic</div>
           <div class="stack-desc">Strict table schema locks. Prohibits reading unauthorized or metadata tables.</div>
-        </div>
-        <div class="stack-item">
+        </a>
+        <a href="#l8" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 08</div>
-          <div class="stack-name">Token Chaining</div>
-          <div class="stack-desc">Rotational cryptographic challenge tokens preventing scripted replay attacks.</div>
-        </div>
-        <div class="stack-item">
+          <div class="stack-name">Query Reconstructor</div>
+          <div class="stack-desc">Discards original raw input and programmatically regenerates safe SQL from AST.</div>
+        </a>
+        <a href="#l9" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 09</div>
-          <div class="stack-name">Shannon Entropy</div>
-          <div class="stack-desc">Analyzes cryptographic randomness to detect obfuscated payload strings.</div>
-        </div>
-        <div class="stack-item">
+          <div class="stack-name">Shannon Entropy &amp; Tokenizer</div>
+          <div class="stack-desc">Independent zero-trust lexical token auditor catching parser edge-cases.</div>
+        </a>
+        <a href="#l10" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 10</div>
-          <div class="stack-name">Honey Canary</div>
-          <div class="stack-desc">Deception tables that silently trigger instant behavioral quarantine.</div>
-        </div>
-        <div class="stack-item">
+          <div class="stack-name">Honey Canary &amp; Behavior</div>
+          <div class="stack-desc">Tiered behavioral penalties, artificial jitter, and shadow-ban honeypots.</div>
+        </a>
+        <a href="#l11" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 11</div>
-          <div class="stack-name">PII Scrubber</div>
-          <div class="stack-desc">In-memory redaction of sensitive credentials, secrets, and private records.</div>
-        </div>
-        <div class="stack-item">
+          <div class="stack-name">Challenge Token Chaining</div>
+          <div class="stack-desc">Rotational cryptographic challenge tokens preventing scripted replay attacks.</div>
+        </a>
+        <a href="#l12" class="stack-item" style="text-decoration: none; display: block;">
           <div class="stack-tag">LAYER 12</div>
-          <div class="stack-name">Output Redactor</div>
-          <div class="stack-desc">Executes strictly the safe AST-reconstructed query, enforcing row count caps.</div>
+          <div class="stack-name">PII Scrubber &amp; Redactor</div>
+          <div class="stack-desc">In-memory redaction of sensitive credentials, secrets, and row count caps.</div>
+        </a>
+      </div>
+
+      <!-- ─── 12-LAYER DEFENSE ENCYCLOPEDIA ─── -->
+
+      <!-- PHASE I -->
+      <div class="encyclopedia-phase">
+        <div class="phase-title">
+          <span>⚡</span> Phase I: Ingress Traffic &amp; Lexical Hygiene (L1 – L4)
+        </div>
+        <div class="phase-badge">Pre-Compilation Guard</div>
+      </div>
+
+      <!-- Layer 1 -->
+      <div class="layer-card" id="l1">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 01</span>
+          <span class="layer-diff-pill">DIFFICULTY: EASY (RATE CAP)</span>
+        </div>
+        <div class="layer-title-text">L1: Rate Limiter — Dynamic Sliding Window Anti-Flood</div>
+        <div class="layer-tagline-text">Domain: Network &amp; Traffic Hygiene · Max 30 req/min per IP</div>
+        <p>
+          Maintains an in-memory sliding token bucket per client IP with full reverse-proxy awareness (trusts canonical <code>X-Forwarded-For</code> headers from Render, Cloudflare, and AWS). It blocks brute-force dictionaries, automated fuzzers (wfuzz, ffuf), and distributed denial-of-service query floods before any CPU-heavy parser logic executes.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Automated tool sweeps (<code>sqlmap --batch</code>)</li>
+              <li>Rapid fuzzing loops (>100 requests in seconds)</li>
+              <li>Denial-of-Service resource exhaustion</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">POST /v1/ctf/query [200 req in 5s]
+--> 429 Too Many Requests
+{ "blocked": true, "reason": "LAYER_1_RATE_LIMIT" }</pre>
+          </div>
+        </div>
+        <p style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-dim);">
+          <strong style="color: var(--text-muted);">Why Regex Firewalls Fail:</strong> Conventional WAFs often use static IP tables easily fooled by forged <code>Client-IP</code> headers. AdminZero verifies trusted edge proxy chains with timing-safe bucket consumption.
+        </p>
+      </div>
+
+      <!-- Layer 2 -->
+      <div class="layer-card" id="l2">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 02</span>
+          <span class="layer-diff-pill">DIFFICULTY: MODERATE</span>
+        </div>
+        <div class="layer-title-text">L2: Encoding Detect — Multi-Byte &amp; Functional Obfuscation Guard</div>
+        <div class="layer-tagline-text">Domain: Lexical Representation Sanitization · Zero-Tolerance Unpacking</div>
+        <p>
+          Inspects the raw and normalized query representations for obfuscation vectors. Detects Hex literals (<code>0x...</code>), double URL encodings (<code>%2527</code>), Unicode escapes (<code>\uXXXX</code>), hex escapes (<code>\xXX</code>), null bytes (<code>\x00</code>), ASCII/CHAR conversion functions (<code>CHAR()</code>, <code>NCHAR()</code>, <code>ASCII()</code>), binary representations (<code>0b...</code>), and SQLite hex string literals (<code>x'4144...'</code>).
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Hex-encoded table targets: <code>SELECT * FROM 0x666c6167</code></li>
+              <li>Function wrappers: <code>SELECT CHAR(102)||CHAR(108)...</code></li>
+              <li>Double-encoded SQL quotes: <code>%2527%2520OR%25201%253D1</code></li>
+              <li>Null-byte injection string terminators</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT name FROM users WHERE name = CHAR(65,100,109,105,110);
+--> 400 Bad Request
+{ "blocked": true, "reason": "LAYER_2_ENCODING: CHAR_FUNCTION" }</pre>
+          </div>
+        </div>
+        <p style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-dim);">
+          <strong style="color: var(--text-muted);">Why Regex Firewalls Fail:</strong> Most WAFs run only one URL-decode pass. Attackers nest encodings (e.g. hex inside base64 inside url-encode) to fly directly under the radar. AdminZero scans for the actual encoding primitives.
+        </p>
+      </div>
+
+      <!-- Layer 3 -->
+      <div class="layer-card" id="l3">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 03</span>
+          <span class="layer-diff-pill">DIFFICULTY: MODERATE</span>
+        </div>
+        <div class="layer-title-text">L3: Keyword Blacklist — Destructive DDL &amp; Side-Channel Shield</div>
+        <div class="layer-tagline-text">Domain: Signature &amp; Primitive Filtering · Prohibits Mutative &amp; Timing Primitives</div>
+        <p>
+          Acts as a hard rejection gate for destructive SQL verbs (<code>DROP</code>, <code>DELETE</code>, <code>TRUNCATE</code>, <code>ALTER</code>), OS execution commands (<code>xp_cmdshell</code>, <code>LOAD_FILE</code>, <code>OUTFILE</code>), timing side-channels (<code>SLEEP</code>, <code>BENCHMARK</code>, <code>pg_sleep</code>, <code>RANDOMBLOB</code>), SQLite engine pragmas (<code>PRAGMA</code>, <code>ATTACH</code>, <code>DETACH</code>, <code>VACUUM</code>), multi-statement stack delimiters (<code>;</code>), and modern LLM prompt injections (<code>ignore previous instructions</code>, <code>DAN mode</code>).
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Table destruction: <code>'; DROP TABLE users;--</code></li>
+              <li>Blind timing extraction: <code>' OR RANDOMBLOB(500000000)--</code></li>
+              <li>SQLite database hijacking: <code>'; ATTACH DATABASE ...</code></li>
+              <li>LLM prompt poisoning: <code>' UNION SELECT 'system: admin'</code></li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT id FROM users; PRAGMA database_list;
+--> 403 Forbidden
+{ "blocked": true, "reason": "LAYER_3_BLACKLIST: /PRAGMA/i" }</pre>
+          </div>
         </div>
       </div>
+
+      <!-- Layer 4 -->
+      <div class="layer-card" id="l4">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 04</span>
+          <span class="layer-diff-pill">DIFFICULTY: MODERATE</span>
+        </div>
+        <div class="layer-title-text">L4: Query Normalizer — Zero-Width Stripper &amp; Homoglyph Translator</div>
+        <div class="layer-tagline-text">Domain: Character &amp; Whitespace Canonicalization · Strips Smuggled Tokens</div>
+        <p>
+          Pre-processes incoming strings before grammar compilation. Strips zero-width unicode splitters (<code>\u200B</code>, <code>\uFEFF</code>) commonly placed inside keywords to evade regex filters, maps Cyrillic/Greek homoglyphs (e.g. Cyrillic <code>а</code>, <code>е</code>, <code>о</code> to ASCII <code>a</code>, <code>e</code>, <code>o</code>), collapses non-standard whitespace variants into single ASCII spaces, and enforces a strict 500-character payload length cap.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Keyword splitting: <code>S\u200BE\u200BL\u200BE\u200BC\u200BT</code></li>
+              <li>Cyrillic visual lookalikes: <code>ЅЕLЕСТ</code></li>
+              <li>Whitespace comment smuggling: <code>SELECT/**/name/**/FROM/**/users</code></li>
+              <li>Buffer memory stuffing attacks (>500 chars)</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT\u200B*\u200BFROM\u200Busers
+--> Canonicalized to: SELECT * FROM users
+(Bypasses are stripped before compilation)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE II -->
+      <div class="encyclopedia-phase">
+        <div class="phase-title">
+          <span>🧠</span> Phase II: Mathematical AST Compilation &amp; Structural Analysis (L5 – L6)
+        </div>
+        <div class="phase-badge">Syntax &amp; Complexity Engine</div>
+      </div>
+
+      <!-- Layer 5 -->
+      <div class="layer-card" id="l5">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 05</span>
+          <span class="layer-diff-pill">DIFFICULTY: HIGH ★★★★☆</span>
+        </div>
+        <div class="layer-title-text">L5: AST Parser — Mathematical Grammar Verification</div>
+        <div class="layer-tagline-text">Domain: Grammar &amp; Syntactic Analysis · Strict SQLite AST Compilation</div>
+        <p>
+          Compiles the normalized SQL string into an Abstract Syntax Tree (AST) using an in-memory SQL grammar parser. If the query breaks SQLite grammar (such as unbalanced single quotes, broken logic fragments, or trailing syntax artifacts) or contains stacked multi-statement queries, compilation fails and the request is quenched immediately.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Quote-break boolean injections: <code>' OR '1'='1</code></li>
+              <li>Unterminated string syntax: <code>admin' OR 1=1 --</code></li>
+              <li>Stacked semicolon injections: <code>SELECT 1; SELECT 2</code></li>
+              <li>Grammar corruption payloads designed to force database leaks</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">' OR '1'='1
+--> 403 Forbidden
+{ "blocked": true, "reason": "LAYER_5_PARSE_FAIL: Invalid SQL syntax" }</pre>
+          </div>
+        </div>
+        <p style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-dim);">
+          <strong style="color: var(--text-muted);">Why Regex Firewalls Fail:</strong> Regular expressions guess whether a quote is suspicious. AdminZero evaluates SQL like a programming language compiler: if the string does not form a well-formed mathematical AST tree, it never reaches execution.
+        </p>
+      </div>
+
+      <!-- Layer 6 -->
+      <div class="layer-card" id="l6">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 06</span>
+          <span class="layer-diff-pill">DIFFICULTY: HIGH ★★★★☆</span>
+        </div>
+        <div class="layer-title-text">L6: Complexity Scorer — AST Depth &amp; Cartesian Product Trap</div>
+        <div class="layer-tagline-text">Domain: Algorithmic Complexity &amp; ReDoS Defense · Tree Depth &le; 8, Nodes &le; 40</div>
+        <p>
+          Recursively walks the compiled AST to compute structural complexity metrics in O(N). Rejects any query whose AST exceeds 40 total nodes, a nesting depth greater than 8 levels, or a fan-out branching factor greater than 12 children per node. Defends against AST parser exhaustion, ReDoS, and combinatorial Cartesian product denial-of-service.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Deeply nested parentheses: <code>((((((((id=1))))))))</code></li>
+              <li>Exponential predicate chains designed to crash the query planner</li>
+              <li>Combinatorial Cartesian join explosions</li>
+              <li>AST parser recursion stack overflow exploits</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT id FROM users WHERE (((((((((((id = 1)))))))))));
+--> 403 Forbidden
+{ "blocked": true, "reason": "LAYER_4_COMPLEXITY: Depth limit exceeded" }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE III -->
+      <div class="encyclopedia-phase">
+        <div class="phase-title">
+          <span>🛡</span> Phase III: Semantic Intent &amp; Query Reconstruction (L7 – L9)
+        </div>
+        <div class="phase-badge">Core Bastion</div>
+      </div>
+
+      <!-- Layer 7 -->
+      <div class="layer-card" id="l7">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 07</span>
+          <span class="layer-diff-pill">DIFFICULTY: VERY HIGH ★★★★★</span>
+        </div>
+        <div class="layer-title-text">L7: Intent &amp; Semantic — Closed-World Whitelist &amp; Scope Guard</div>
+        <div class="layer-tagline-text">Domain: Semantic Access Control · Closed-World Table &amp; Column Whitelist</div>
+        <p>
+          Performs deep semantic inspection on every AST node. Operates on a strict closed-world access model: only <code>SELECT</code> statements are permitted. Only whitelisted public tables (<code>users</code>, <code>products</code>) can be queried. Any mention of metadata tables (<code>sqlite_master</code>, <code>sqlite_sequence</code>) or secrets (<code>flag_table</code>, <code>fake_flags</code>, <code>audit_log</code>) is rejected. Furthermore, subqueries, CTEs (<code>WITH ... AS</code>), set operations (<code>UNION</code>, <code>INTERSECT</code>, <code>EXCEPT</code>), and wildcard <code>SELECT *</code> projections are forbidden. A hard row cap (max 10) is also enforced.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Metadata enumeration: <code>SELECT * FROM sqlite_master</code></li>
+              <li>Secret extraction: <code>SELECT * FROM flag_table</code></li>
+              <li>UNION-based data stealing: <code>UNION SELECT null, flag FROM flag_table</code></li>
+              <li>Subquery extraction: <code>SELECT (SELECT flag FROM flag_table) FROM users</code></li>
+              <li>Wildcard database dumping: <code>SELECT * FROM users</code></li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT name FROM users WHERE id IN (SELECT id FROM flag_table);
+--> 403 Forbidden
+{ "blocked": true, "reason": "LAYER_6_SUBQUERY: Nested SELECT (subquery) is blocked" }</pre>
+          </div>
+        </div>
+        <p style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-dim);">
+          <strong style="color: var(--text-muted);">Why Regex Firewalls Fail:</strong> Regex blacklists try to block words like "password". If a developer names a table "admin_tokens", regex fails completely. AdminZero uses a CLOSED-WORLD whitelist: unknown tables or columns are physically non-existent to the query engine.
+        </p>
+      </div>
+
+      <!-- Layer 8 -->
+      <div class="layer-card" id="l8">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 08</span>
+          <span class="layer-diff-pill">DIFFICULTY: EXTREME ★★★★★</span>
+        </div>
+        <div class="layer-title-text">L8: Query Reconstructor — Safe AST Re-Synthesis &amp; String Destruction</div>
+        <div class="layer-tagline-text">Domain: Input Decoupling &amp; Safe Code Generation · Original String Wiped</div>
+        <p>
+          The attacker's raw user query string is permanently destroyed! AdminZero takes exclusively the validated AST nodes and regenerates brand-new, canonical SQL using <code>parser.sqlify(stmtNode, { database: 'SQLite' })</code>. Any smuggled comments, whitespace tricks, parser desynchronization artifacts, or dialect discrepancies are wiped from existence before the SQLite driver executes the query. The reconstructed query is then subjected to a secondary post-validation blacklist scan.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Parser desynchronization (exploiting differences between parser &amp; engine)</li>
+              <li>Comment smuggling payloads: <code>SELECT/*foo*/id FROM users</code></li>
+              <li>Driver-specific string interpolation exploits</li>
+              <li>Multi-byte smuggling where raw bytes bypass string filters</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Architectural Proof</div>
+            <pre class="code-preview">Input:  SELECT `id`, `name` FROM `users` WHERE `id`=1 /*smuggled*/
+Output: SELECT `id`, `name` FROM `users` WHERE `id` = 1
+--> The raw input string was completely discarded.
+Only the AST-reconstructed query hits the DB engine.</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layer 9 -->
+      <div class="layer-card" id="l9">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 09</span>
+          <span class="layer-diff-pill">DIFFICULTY: VERY HIGH ★★★★★</span>
+        </div>
+        <div class="layer-title-text">L9: Shannon Entropy &amp; Tokenizer — Zero-Trust Lexical Token Auditor</div>
+        <div class="layer-tagline-text">Domain: Lexical Entropy &amp; Independent Parser Verification · Zero Trust in AST</div>
+        <p>
+          A hand-rolled, zero-dependency lexical tokenizer operates directly on the raw string and the reconstructed string completely independent of <code>node-sql-parser</code>. It scans every token identifier and verifies that forbidden names (<code>flag_table</code>, <code>flag</code>, <code>secret</code>, <code>audit_log</code>, <code>sqlite_master</code>) do not appear anywhere in the query, neutralizing any theoretical zero-day AST parser categorization bugs.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Parser categorization zero-days (where a parser fails to identify a table token)</li>
+              <li>Bracketed and backtick identifier smuggling: <code>[flag_table]</code>, <code>`flag_table`</code></li>
+              <li>High-entropy obfuscated shell fragments</li>
+              <li>Dual-parser discrepancy attacks</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT id FROM users WHERE name = "flag_table";
+--> 403 Forbidden
+{ "blocked": true, "reason": "LAYER_9_TOKENIZER: Raw identifier 'flag_table' is forbidden" }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHASE IV -->
+      <div class="encyclopedia-phase">
+        <div class="phase-title">
+          <span>🎭</span> Phase IV: Deception, Anti-Automation &amp; Egress Redaction (L10 – L12)
+        </div>
+        <div class="phase-badge">Active Defense &amp; Privacy</div>
+      </div>
+
+      <!-- Layer 10 -->
+      <div class="layer-card" id="l10">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 10</span>
+          <span class="layer-diff-pill">DIFFICULTY: CRUEL &amp; DECEPTIVE ★★★★★</span>
+        </div>
+        <div class="layer-title-text">L10: Honey Canary &amp; Behavioral Guard — Tiered Quarantine &amp; Shadow Ban</div>
+        <div class="layer-tagline-text">Domain: Client Reputation &amp; Deception Technology · 4 Escalating Penalty Tiers</div>
+        <p>
+          Continuously scores each client IP across an escalating 4-tier behavioral penalty system:
+          <br>• <strong>Tier 0 (0-2 blocks):</strong> Normal rejection responses.
+          <br>• <strong>Tier 1 (3-5 blocks):</strong> Injects artificial delays (up to 2000ms jitter) + vague responses to slow automated fuzzers.
+          <br>• <strong>Tier 2 (6-9 blocks):</strong> <em>SHADOW BAN</em> — Returns HTTP 200 OK with plausible <strong>FAKE decoy data</strong> (e.g. decoy users like "Ravi Issak" and fake product records) so attackers waste hours analyzing fabricated honey canary data.
+          <br>• <strong>Tier 3 (10+ blocks):</strong> Hard ban quarantining the IP with HTTP 403.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Automated payload discovery loops</li>
+              <li>Blind SQL injection timing measurements (ruined by random jitter)</li>
+              <li>Adversarial reconnaissance (hackers waste time analyzing fake honey data)</li>
+              <li>Persistent botnet probes</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Shadow Ban Honeypot</div>
+            <pre class="code-preview">POST /v1/ctf/query [after 6 failed attempts]
+--> 200 OK
+{ "rows": [{ "name": "Ravi Issak", "role": "admin" }] }
+(Attacker thinks they succeeded, but data is 100% fabricated decoy!)</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layer 11 -->
+      <div class="layer-card" id="l11">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 11</span>
+          <span class="layer-diff-pill">DIFFICULTY: VERY HIGH ★★★★★</span>
+        </div>
+        <div class="layer-title-text">L11: Challenge Token Chaining — HMAC-SHA256 Anti-Automation Rotation</div>
+        <div class="layer-tagline-text">Domain: Cryptographic State &amp; Session Verification · Sequential Execution Enforced</div>
+        <p>
+          Every response signs an HMAC-SHA256 cryptographic challenge token (<code>X-Next-Token</code>) bound to the client's IP, request ID, and timestamp window. Subsequent requests must present this token in the <code>X-Challenge-Token</code> header. This enforces strictly sequential query execution, neutralizing parallel burst attacks, asynchronous replay bots, and headless fuzzers.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Parallelized multi-threaded fuzzing (Burp Intruder at 100 threads)</li>
+              <li>Headless replay scripts lacking state handlers</li>
+              <li>Race-condition concurrency attacks</li>
+              <li>Distributed request amplification</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">POST /v1/ctf/query [without valid X-Challenge-Token]
+--> 403 Forbidden
+{ "blocked": true, "reason": "LAYER_11_CHALLENGE_FAILED" }</pre>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layer 12 -->
+      <div class="layer-card" id="l12">
+        <div class="layer-card-top">
+          <span class="layer-pill-tag">LAYER 12</span>
+          <span class="layer-diff-pill">DIFFICULTY: FINAL WALL ★★★★★</span>
+        </div>
+        <div class="layer-title-text">L12: PII Scrubber &amp; Output Redactor — In-Memory Egress Sanitization</div>
+        <div class="layer-tagline-text">Domain: Data Exfiltration &amp; Privacy Defense · Zero Leaks on Egress</div>
+        <p>
+          The final barrier before data leaves the server. Intercepts raw database result rows in memory and applies dynamic PII redaction: masks email addresses (e.g. <code>r***k@glitchgo.tech</code>), masks phone numbers, replaces passwords, hashes, tokens, API keys, and secret values with <code>***REDACTED***</code>, and caps results to a maximum of 10 rows to prevent full-table exfiltration.
+        </p>
+        <div class="layer-grid-2">
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-red);">🛑 Quenched Attack Vectors</div>
+            <ul style="padding-left: 1.1rem; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+              <li>Bulk database table dumping</li>
+              <li>Credential theft through leaked user records</li>
+              <li>PII harvesting (emails, phone numbers, addresses)</li>
+              <li>Side-channel flag leakage in non-flag tables</li>
+            </ul>
+          </div>
+          <div class="layer-box-sub">
+            <div class="layer-box-sub-title" style="color: var(--neon-amber);">⚡ Intercept Signature</div>
+            <pre class="code-preview">SELECT id, name, email, role FROM users LIMIT 100;
+--> Capped to 10 rows; email masked in-memory to:
+{ "name": "Issak", "email": "i***k@glitchgo.tech", "role": "admin" }</pre>
+          </div>
+        </div>
+        <p style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-dim);">
+          <strong style="color: var(--text-muted);">Why Regex Firewalls Fail:</strong> WAFs only inspect INPUT. If an application leaks sensitive data in the database response, a traditional WAF does nothing. AdminZero guards both ingress and egress: even if an unexpected row is read, Layer 12 sanitizes the output in memory before serialization.
+        </p>
+      </div>
+
     </section>
 
     <!-- Section 3: Why Break The Wall? -->
