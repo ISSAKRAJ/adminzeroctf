@@ -1,22 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "runtime": "nodejs24.x",
-        "includeFiles": [
-          "backend/src/**",
-          "backend/package.json"
-        ]
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
-    }
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/admin", "destination": "/frontend/admin.html" },
+    { "source": "/", "destination": "/frontend/index.html" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
   ]
 }

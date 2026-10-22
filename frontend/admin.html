@@ -3,178 +3,1323 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AdminZero CTF — Admin Dashboard</title>
+  <title>AdminZero CTF — Security Operations Center &amp; Hacker Telemetry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #050505;
-      --card: #0a0a0a;
-      --border: #330000;
-      --accent: #ff003c;
-      --green: #00ff41;
-      --red: #ff003c;
-      --text: #e2e8f0;
-      --mono: 'Courier New', monospace;
+      --bg-base: #06080d;
+      --bg-surface: #0b0f17;
+      --bg-card: rgba(14, 20, 30, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(0, 240, 255, 0.3);
+
+      --neon-cyan: #00f0ff;
+      --neon-red: #ff0055;
+      --neon-emerald: #00ff88;
+      --neon-amber: #ffb703;
+      --neon-purple: #a855f7;
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      background: var(--bg);
+      background-color: var(--bg-base);
       background-image: 
-        linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-      background-size: 20px 20px;
-      color: var(--text);
-      font-family: var(--mono);
+        radial-gradient(ellipse at 50% 0%, rgba(255, 0, 85, 0.08) 0%, transparent 60%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 36px 36px, 36px 36px;
+      color: var(--text-main);
+      font-family: var(--font-sans);
       min-height: 100vh;
-      padding: 2rem;
+      line-height: 1.5;
     }
-    body::after {
-      content: " ";
-      display: block;
+
+    body::before {
+      content: "";
       position: fixed;
-      top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-      z-index: 2;
-      background-size: 100% 2px, 3px 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+      background-size: 100% 4px;
+      z-index: 999;
       pointer-events: none;
+      opacity: 0.5;
     }
+
     .container {
-      max-width: 1200px;
+      max-width: 1380px;
       margin: 0 auto;
+      padding: 1.5rem 1.25rem 4rem;
       position: relative;
-      z-index: 3;
+      z-index: 10;
     }
-    h1 {
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 4px;
+
+    /* ─── Top Nav ─── */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
       margin-bottom: 2rem;
-      text-shadow: 2px 2px 0px rgba(255, 0, 60, 0.5);
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
     }
-    table {
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--neon-red), var(--neon-amber));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+    }
+
+    .brand-title {
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .brand-tag {
+      font-size: 0.68rem;
+      background: rgba(255, 0, 85, 0.15);
+      border: 1px solid rgba(255, 0, 85, 0.35);
+      color: var(--neon-red);
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 1px;
+    }
+
+    .nav-tools {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .btn-export {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--neon-cyan);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-export:hover {
+      background: rgba(0, 240, 255, 0.2);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    }
+
+    .btn-lock {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-dim);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-lock:hover {
+      color: var(--neon-red);
+      border-color: var(--neon-red);
+    }
+
+    .btn-ctf-arena {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s;
+    }
+
+    .btn-ctf-arena:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ─── Global Stats HUD ─── */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1100px) {
+      .hud-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 650px) {
+      .hud-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .hud-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hud-box::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--box-accent, var(--neon-cyan)), transparent);
+    }
+
+    .hud-kpi-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 0.35rem;
+    }
+
+    .hud-kpi-val {
+      font-family: var(--font-mono);
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--box-color, #fff);
+      line-height: 1.1;
+    }
+
+    .hud-kpi-sub {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* ─── Two-Column Section: Layer Breakdown + Hackers ─── */
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 1fr 2.2fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .panel-header {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-title {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ─── Layer Breakdown Table ─── */
+    .layer-table {
       width: 100%;
       border-collapse: collapse;
-      background: var(--card);
-      border: 1px solid var(--border);
+      font-size: 0.78rem;
     }
-    th, td {
-      padding: 1rem;
+
+    .layer-table th {
+      padding: 0.65rem 0.85rem;
       text-align: left;
-      border-bottom: 1px solid #1a1a1a;
-      font-size: 0.85rem;
-    }
-    th {
-      background: #111;
-      color: var(--accent);
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
       text-transform: uppercase;
-      font-weight: bold;
+      border-bottom: 1px solid var(--border-subtle);
     }
-    .status-blocked {
-      color: var(--red);
-      font-weight: bold;
+
+    .layer-table td {
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
     }
-    .status-passed {
-      color: var(--green);
-      font-weight: bold;
+
+    .layer-name-tag {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--neon-cyan);
     }
-    code {
-      background: #000;
-      padding: 4px 8px;
+
+    .progress-bar-bg {
+      width: 70px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--neon-emerald);
+      border-radius: 3px;
+    }
+
+    /* ─── Filter & Search Bar ─── */
+    .filter-bar {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 220px;
+      background: #05070a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.55rem 0.85rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .search-input:focus {
+      border-color: var(--neon-cyan);
+    }
+
+    .date-input {
+      background: #05070a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.55rem 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      outline: none;
+    }
+
+    .btn-filter-refresh {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: #fff;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-filter-refresh:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    /* ─── Hacker Table ─── */
+    .hacker-table-wrap {
+      overflow-x: auto;
+    }
+
+    .hacker-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      text-align: left;
+    }
+
+    .hacker-table th {
+      padding: 0.75rem 1rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .hacker-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    .hacker-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .hacker-handle-col {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .hacker-email-col {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    .btn-inspect {
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      color: var(--neon-cyan);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-inspect:hover {
+      background: rgba(0, 240, 255, 0.25);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    }
+
+    /* ─── Hacker Detail Modal / Drawer ─── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 7, 10, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .detail-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      max-width: 980px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.75rem;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.15);
+      position: relative;
+    }
+
+    .detail-close {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.25rem;
+      cursor: pointer;
+    }
+
+    .detail-close:hover { color: #fff; }
+
+    .detail-hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .detail-handle {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    .detail-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 650px) {
+      .detail-stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .mini-stat {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.75rem;
+    }
+
+    .mini-stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .mini-stat-val {
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    /* Points SVG Chart */
+    .chart-container {
+      background: #05070a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chart-header {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .svg-chart {
+      width: 100%;
+      height: 140px;
+      overflow: visible;
+    }
+
+    /* Timeline Table */
+    .timeline-title {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .timeline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .timeline-table th {
+      padding: 0.6rem 0.85rem;
+      text-align: left;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .timeline-table td {
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    .pill-block {
+      background: rgba(255, 0, 85, 0.15);
+      border: 1px solid rgba(255, 0, 85, 0.35);
+      color: var(--neon-red);
+      padding: 2px 6px;
       border-radius: 4px;
-      color: var(--green);
-      border: 1px solid var(--border);
-      display: block;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .pill-pass {
+      background: rgba(0, 255, 136, 0.15);
+      border: 1px solid rgba(0, 255, 136, 0.35);
+      color: var(--neon-emerald);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .code-snippet {
+      background: #000;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--neon-emerald);
       white-space: pre-wrap;
       word-break: break-all;
+      max-height: 80px;
+      overflow-y: auto;
+      max-width: 440px;
     }
-    .refresh-btn {
-      background: var(--accent);
+
+    /* ─── Passcode Gate Modal ─── */
+    .gate-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg-base);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .gate-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      max-width: 420px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 240, 255, 0.2);
+    }
+
+    .gate-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .gate-title {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 800;
       color: #fff;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .gate-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .gate-input {
+      width: 100%;
+      background: #05070a;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      text-align: center;
+      outline: none;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s;
+    }
+
+    .gate-input:focus {
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+    }
+
+    .gate-error {
+      background: rgba(255, 0, 85, 0.12);
+      border: 1px solid rgba(255, 0, 85, 0.3);
+      color: var(--neon-red);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .btn-gate-unlock {
+      width: 100%;
+      background: linear-gradient(135deg, var(--neon-cyan), #0099ff);
+      color: #05070a;
       border: none;
-      padding: 10px 20px;
-      font-family: var(--mono);
+      padding: 0.85rem;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 0.9rem;
       cursor: pointer;
       text-transform: uppercase;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: all 0.2s;
     }
-    .refresh-btn:hover {
-      opacity: 0.8;
+
+    .btn-gate-unlock:hover {
+      filter: brightness(1.15);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
     }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>System Audit Logs // Live</h1>
-    <button class="refresh-btn" onclick="fetchLogs()">Refresh Logs</button>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Timestamp</th>
-          <th>IP Address</th>
-          <th>Status</th>
-          <th>Reason</th>
-          <th>Query Payload</th>
-        </tr>
-      </thead>
-      <tbody id="logsTableBody">
-        <tr><td colspan="6">Loading logs...</td></tr>
-      </tbody>
-    </table>
+
+  <!-- Passcode Authentication Gate -->
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-box">
+      <div class="gate-icon">🔐</div>
+      <div class="gate-title">Operator Clearance</div>
+      <div class="gate-sub">Enter the Admin Master Key to inspect telemetry, hacker payloads, and system forensics.</div>
+      
+      <div class="gate-error" id="gateError"></div>
+
+      <input
+        type="password"
+        id="gateKeyInput"
+        class="gate-input"
+        placeholder="••••••••••••••••"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter') verifyAdminKey()"
+      />
+
+      <button class="btn-gate-unlock" id="btnGateUnlock" onclick="verifyAdminKey()">
+        Unlock Terminal
+      </button>
+      <div style="margin-top: 1rem;">
+        <a href="/" style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim); text-decoration: none;">← Return to CTF Arena</a>
+      </div>
+    </div>
   </div>
 
-  <script>
-    const CONFIG_BACKEND = "https://adminzeroctf.onrender.com";
-    const API = (CONFIG_BACKEND && !CONFIG_BACKEND.includes("YOUR_BACKEND_URL"))
-      ? CONFIG_BACKEND
-      : (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-        ? "http://localhost:3001"
-        : CONFIG_BACKEND;
+  <!-- Main Dashboard Container -->
+  <div class="container" id="mainDashboard" style="display: none;">
 
-    async function fetchLogs() {
-      if (!API || API.includes("YOUR_BACKEND_URL")) {
-        document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="status-blocked">Please set your backend URL in admin.html (CONFIG_BACKEND).</td></tr>`;
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="brand">
+        <div class="brand-icon">⚔️</div>
+        <div>
+          <div class="brand-title">AdminZero SOC // Telemetry Hub</div>
+        </div>
+        <div class="brand-tag">CONFIDENTIAL · OPERATOR ACCESS</div>
+      </div>
+
+      <div class="nav-tools">
+        <a id="btnCsvExport" class="btn-export" href="#" target="_blank" onclick="downloadCsv(event)">
+          <span>📥</span> Export CSV
+        </a>
+        <a href="/" class="btn-ctf-arena">Public Arena ↗</a>
+        <button class="btn-lock" onclick="lockConsole()">Lock Console 🔒</button>
+      </div>
+    </header>
+
+    <!-- Global HUD KPI Cards -->
+    <section class="hud-grid">
+      <div class="hud-box" style="--box-accent: var(--neon-cyan); --box-color: var(--neon-cyan);">
+        <div class="hud-kpi-label">Unique Operators</div>
+        <div class="hud-kpi-val" id="kpiVisitors">—</div>
+        <div class="hud-kpi-sub">Hashed IP identifiers</div>
+      </div>
+
+      <div class="hud-box" style="--box-accent: var(--neon-red); --box-color: var(--neon-red);">
+        <div class="hud-kpi-label">Total Attempts</div>
+        <div class="hud-kpi-val" id="kpiAttempts">—</div>
+        <div class="hud-kpi-sub">Deflected + Bypasses</div>
+      </div>
+
+      <div class="hud-box" style="--box-accent: var(--neon-emerald); --box-color: var(--neon-emerald);">
+        <div class="hud-kpi-label">Active (5m)</div>
+        <div class="hud-kpi-val" id="kpiActive">—</div>
+        <div class="hud-kpi-sub">Active players attacking</div>
+      </div>
+
+      <div class="hud-box" style="--box-accent: var(--neon-purple); --box-color: var(--neon-purple);">
+        <div class="hud-kpi-label">Registered Solvers</div>
+        <div class="hud-kpi-val" id="kpiHackers">—</div>
+        <div class="hud-kpi-sub">Enlisted identities</div>
+      </div>
+
+      <div class="hud-box" style="--box-accent: var(--neon-amber); --box-color: var(--neon-amber);">
+        <div class="hud-kpi-label">Flags Captured</div>
+        <div class="hud-kpi-val" id="kpiFlags">—</div>
+        <div class="hud-kpi-sub">Wall breach count</div>
+      </div>
+
+      <div class="hud-box" style="--box-accent: var(--neon-red); --box-color: #fff;">
+        <div class="hud-kpi-label">Top Target Layer</div>
+        <div class="hud-kpi-val" id="kpiTopLayer" style="font-size: 1.15rem; word-break: break-all;">—</div>
+        <div class="hud-kpi-sub" id="kpiTopLayerSub">Most hit firewall stage</div>
+      </div>
+    </section>
+
+    <!-- Main Content Layout -->
+    <div class="dashboard-layout">
+
+      <!-- Left Column: Layer Attack Breakdown -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🛡</span> 12-Layer Defense Metrics
+          </div>
+        </div>
+
+        <table class="layer-table">
+          <thead>
+            <tr>
+              <th>Layer</th>
+              <th>Hits</th>
+              <th>Success Rate</th>
+            </tr>
+          </thead>
+          <tbody id="layerTableBody">
+            <tr><td colspan="3" style="text-align:center; padding:2rem; color:var(--text-dim);">Loading layer defense statistics...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Right Column: Hacker Registry & Search -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>👥</span> Enlisted Hacker Roster
+          </div>
+          <div style="font-family: var(--font-mono); font-size: 0.72rem; color: var(--text-dim);">
+            Click "Inspect" to view exact payloads
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-bar">
+          <input
+            type="text"
+            id="searchHackerInput"
+            class="search-input"
+            placeholder="Search handle or email..."
+            oninput="debounceSearch()"
+          />
+          <input
+            type="date"
+            id="filterDateFrom"
+            class="date-input"
+            title="Date From"
+            onchange="loadHackersList()"
+          />
+          <button class="btn-filter-refresh" onclick="loadHackersList()">
+            ⟳ Refresh
+          </button>
+        </div>
+
+        <!-- Hackers Table -->
+        <div class="hacker-table-wrap">
+          <table class="hacker-table">
+            <thead>
+              <tr>
+                <th>Handle</th>
+                <th>Email</th>
+                <th>Signup</th>
+                <th>Sessions</th>
+                <th>Last Active</th>
+                <th>Points</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="hackersTableBody">
+              <tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-dim);">Loading hacker directory...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Hacker Detail Modal / Drawer -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="detail-card">
+      <button class="detail-close" onclick="closeDetailModal()">✕</button>
+
+      <!-- Hacker Hero Banner -->
+      <div class="detail-hero">
+        <div>
+          <div class="detail-handle">
+            <span id="dhHandle">@handle</span>
+            <span id="dhFlagBadge" style="display:none; font-size:0.75rem; background:rgba(255,183,3,0.15); color:var(--neon-amber); padding:2px 8px; border-radius:4px; border:1px solid rgba(255,183,3,0.3);">👑 Flag Captured</span>
+          </div>
+          <div class="detail-meta">
+            <span id="dhEmail">email@domain.com</span> · Signed up: <span id="dhSignup">—</span>
+          </div>
+        </div>
+        <div id="dhGithubLink"></div>
+      </div>
+
+      <!-- Mini KPI Metrics -->
+      <div class="detail-stats-grid">
+        <div class="mini-stat">
+          <div class="mini-stat-label">Total Points</div>
+          <div class="mini-stat-val" id="dhPoints" style="color:var(--neon-amber);">0</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Total Attempts</div>
+          <div class="mini-stat-val" id="dhAttempts">0</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Bypasses</div>
+          <div class="mini-stat-val" id="dhBypasses" style="color:var(--neon-emerald);">0</div>
+        </div>
+        <div class="mini-stat">
+          <div class="mini-stat-label">Last Seen</div>
+          <div class="mini-stat-val" id="dhLastActive" style="font-size:0.85rem;">—</div>
+        </div>
+      </div>
+
+      <!-- Points Chart -->
+      <div class="chart-container">
+        <div class="chart-header">
+          <span>Points Accumulation Velocity</span>
+          <span id="chartPointsSummary">Cumulative Score</span>
+        </div>
+        <svg id="pointsSvgChart" class="svg-chart" viewBox="0 0 600 120" preserveAspectRatio="none">
+          <text x="300" y="60" text-anchor="middle" fill="#64748b" font-size="12" font-family="JetBrains Mono">Awaiting attempts data...</text>
+        </svg>
+      </div>
+
+      <!-- Layer Breakdown for this hacker -->
+      <div style="margin-bottom: 1.5rem;">
+        <div class="timeline-title">Targeted Defense Layers</div>
+        <div id="dhLayerPills" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
+      </div>
+
+      <!-- Timeline Table -->
+      <div>
+        <div class="timeline-title">Complete Attack Payload Timeline (Newest First)</div>
+        <table class="timeline-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Timestamp</th>
+              <th style="width: 140px;">Layer</th>
+              <th style="width: 90px;">Result</th>
+              <th style="width: 70px;">Pts</th>
+              <th>Raw SQL Payload Tried</th>
+            </tr>
+          </thead>
+          <tbody id="timelineTableBody">
+            <tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-dim);">No attempts recorded for this hacker.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // ─── Environment & API Base URL ──────────────────────────────────────────
+    const CONFIG_BACKEND = "https://adminzeroctf.onrender.com";
+    const API = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+      ? "http://localhost:3001"
+      : (CONFIG_BACKEND && !CONFIG_BACKEND.includes("YOUR_BACKEND_URL"))
+        ? CONFIG_BACKEND
+        : window.location.origin;
+
+    let adminKey = sessionStorage.getItem("az_admin_key") || "";
+
+    // ─── Authentication Flow ─────────────────────────────────────────────────
+    async function verifyAdminKey() {
+      const input = document.getElementById("gateKeyInput");
+      const errBox = document.getElementById("gateError");
+      const btn = document.getElementById("btnGateUnlock");
+      const key = input.value.trim();
+
+      errBox.style.display = "none";
+      if (!key) {
+        errBox.textContent = "Please enter the Admin Master Key.";
+        errBox.style.display = "block";
         return;
       }
-      try {
-        const res = await fetch(`${API}/v1/ctf/logs`);
-        const logs = await res.json();
-        const tbody = document.getElementById('logsTableBody');
-        tbody.innerHTML = '';
 
-        if (logs.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6">No logs found.</td></tr>';
-          return;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Verifying...';
+
+      try {
+        const res = await fetch(`${API}/v1/ctf/admin/verify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Admin-Key": key
+          },
+          body: JSON.stringify({ admin_key: key })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || "Invalid Admin Master Key.");
         }
 
-        logs.forEach(log => {
-          const tr = document.createElement('tr');
-          const isBlocked = log.blocked === 1;
-          
-          tr.innerHTML = `
-            <td>${log.id}</td>
-            <td>${log.timestamp}</td>
-            <td>${log.ip}</td>
-            <td class="${isBlocked ? 'status-blocked' : 'status-passed'}">
-              ${isBlocked ? 'BLOCKED' : 'PASSED'}
-            </td>
-            <td>${log.reason || '-'}</td>
-            <td><code>${log.query ? log.query.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '-'}</code></td>
-          `;
-          tbody.appendChild(tr);
-        });
+        adminKey = key;
+        sessionStorage.setItem("az_admin_key", adminKey);
+
+        document.getElementById("gateOverlay").style.display = "none";
+        document.getElementById("mainDashboard").style.display = "block";
+
+        loadGlobalStats();
+        loadHackersList();
+
       } catch (err) {
-        console.error("Failed to fetch logs", err);
-        document.getElementById('logsTableBody').innerHTML = `<tr><td colspan="6" class="status-blocked">Error connecting to server.</td></tr>`;
+        errBox.textContent = err.message;
+        errBox.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = "Unlock Terminal";
       }
     }
 
-    // Initial fetch and poll every 5 seconds
-    fetchLogs();
-    setInterval(fetchLogs, 5000);
+    function lockConsole() {
+      sessionStorage.removeItem("az_admin_key");
+      adminKey = "";
+      document.getElementById("gateOverlay").style.display = "flex";
+      document.getElementById("mainDashboard").style.display = "none";
+      document.getElementById("gateKeyInput").value = "";
+    }
+
+    // Auto-verify if session key exists
+    if (adminKey) {
+      document.getElementById("gateKeyInput").value = adminKey;
+      verifyAdminKey();
+    }
+
+    // ─── Load Global Stats & Layer Breakdown ─────────────────────────────────
+    async function loadGlobalStats() {
+      if (!adminKey) return;
+      try {
+        const res = await fetch(`${API}/v1/ctf/admin/stats`, {
+          headers: { "X-Admin-Key": adminKey }
+        });
+        if (!res.ok) {
+          if (res.status === 401) lockConsole();
+          return;
+        }
+
+        const data = await res.json();
+
+        document.getElementById("kpiVisitors").textContent = Number(data.unique_visitors || 0).toLocaleString();
+        document.getElementById("kpiAttempts").textContent = Number(data.total_attempts || 0).toLocaleString();
+        document.getElementById("kpiActive").textContent = Number(data.active_last_5min || 1).toLocaleString();
+        document.getElementById("kpiHackers").textContent = Number(data.total_hackers || 0).toLocaleString();
+        document.getElementById("kpiFlags").textContent = Number(data.flags_captured || 0).toLocaleString();
+        document.getElementById("kpiTopLayer").textContent = data.most_attacked_layer || "None";
+
+        // Render Layer Stats Table
+        const tbody = document.getElementById("layerTableBody");
+        if (!data.layer_stats || data.layer_stats.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:1.5rem; color:var(--text-dim);">No attacks logged yet.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.layer_stats.map(l => {
+          const rate = parseFloat(l.success_rate || 0);
+          return `
+            <tr>
+              <td>
+                <span class="layer-name-tag">${escapeHtml(l.layer)}</span>
+              </td>
+              <td><strong>${Number(l.total_attempts).toLocaleString()}</strong></td>
+              <td>
+                <span class="progress-bar-bg">
+                  <div class="progress-bar-fill" style="width: ${rate}%;"></div>
+                </span>
+                ${rate}%
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+      } catch (err) {
+        console.error("Failed to load global stats:", err);
+      }
+    }
+
+    // ─── Load Hackers List ───────────────────────────────────────────────────
+    let searchDebounceTimer = null;
+    function debounceSearch() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(loadHackersList, 300);
+    }
+
+    async function loadHackersList() {
+      if (!adminKey) return;
+      const search = document.getElementById("searchHackerInput").value.trim();
+      const dateFrom = document.getElementById("filterDateFrom").value;
+
+      try {
+        const params = new URLSearchParams();
+        if (search) params.append("search", search);
+        if (dateFrom) params.append("date_from", dateFrom);
+
+        const res = await fetch(`${API}/v1/ctf/admin/hackers?${params.toString()}`, {
+          headers: { "X-Admin-Key": adminKey }
+        });
+
+        if (!res.ok) {
+          if (res.status === 401) lockConsole();
+          return;
+        }
+
+        const data = await res.json();
+        const tbody = document.getElementById("hackersTableBody");
+
+        if (!data.hackers || data.hackers.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-dim);">No hackers found matching the filter.</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = data.hackers.map(h => {
+          const signup = h.signup_time ? new Date(h.signup_time).toLocaleDateString() : "—";
+          const lastActive = h.last_active ? new Date(h.last_active).toLocaleTimeString() : "—";
+
+          return `
+            <tr>
+              <td class="hacker-handle-col">@${escapeHtml(h.handle)}</td>
+              <td class="hacker-email-col">${escapeHtml(h.email)}</td>
+              <td>${signup}</td>
+              <td><strong>${h.session_count || 1}</strong></td>
+              <td>${lastActive}</td>
+              <td><span style="font-family:var(--font-mono); font-weight:700; color:var(--neon-emerald);">${(h.total_points || 0).toLocaleString()} PTS</span></td>
+              <td style="text-align: right;">
+                <button class="btn-inspect" onclick="inspectHacker(${h.id})">Inspect →</button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+
+      } catch (err) {
+        console.error("Failed to load hackers:", err);
+      }
+    }
+
+    // ─── Hacker Detail & Timeline Modal ──────────────────────────────────────
+    async function inspectHacker(hackerId) {
+      if (!adminKey) return;
+
+      try {
+        const res = await fetch(`${API}/v1/ctf/admin/hackers/${hackerId}`, {
+          headers: { "X-Admin-Key": adminKey }
+        });
+
+        if (!res.ok) throw new Error("Could not fetch hacker details.");
+        const data = await res.json();
+        const { hacker, layer_breakdown, points_progress, timeline } = data;
+
+        // Populate Hero & Mini Stats
+        document.getElementById("dhHandle").textContent = `@${hacker.handle}`;
+        document.getElementById("dhEmail").textContent = hacker.email;
+        document.getElementById("dhSignup").textContent = hacker.signup_time ? new Date(hacker.signup_time).toLocaleString() : "—";
+        document.getElementById("dhPoints").textContent = (hacker.total_points || 0).toLocaleString();
+        document.getElementById("dhAttempts").textContent = (timeline || []).length;
+        
+        const bypassCount = (timeline || []).filter(t => !t.blocked).length;
+        document.getElementById("dhBypasses").textContent = bypassCount;
+        document.getElementById("dhLastActive").textContent = hacker.last_active ? new Date(hacker.last_active).toLocaleString() : "—";
+
+        // GitHub link
+        const ghWrap = document.getElementById("dhGithubLink");
+        if (hacker.github_url) {
+          ghWrap.innerHTML = `<a href="${escapeHtml(hacker.github_url)}" target="_blank" class="btn-inspect" style="text-decoration:none;">GitHub Profile ↗</a>`;
+        } else {
+          ghWrap.innerHTML = "";
+        }
+
+        // Flag badge
+        document.getElementById("dhFlagBadge").style.display = hacker.flags_captured > 0 ? "inline-block" : "none";
+
+        // Layer pills
+        const pillsWrap = document.getElementById("dhLayerPills");
+        if (layer_breakdown && layer_breakdown.length > 0) {
+          pillsWrap.innerHTML = layer_breakdown.map(lb => `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-subtle); border-radius:6px; padding:4px 8px; font-family:var(--font-mono); font-size:0.7rem;">
+              <span style="color:var(--neon-cyan);">${escapeHtml(lb.layer)}</span>:
+              <strong>${lb.attempts} hits</strong> (${lb.success_rate}% bypass)
+            </div>
+          `).join("");
+        } else {
+          pillsWrap.innerHTML = `<span style="color:var(--text-dim); font-size:0.75rem;">No layer attacks recorded.</span>`;
+        }
+
+        // Render SVG Points Chart
+        renderPointsChart(points_progress || []);
+
+        // Render Timeline
+        const tbody = document.getElementById("timelineTableBody");
+        if (!timeline || timeline.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:1.5rem; color:var(--text-dim);">No queries logged for this hacker.</td></tr>`;
+        } else {
+          tbody.innerHTML = timeline.map(t => {
+            const isPassed = !t.blocked;
+            const badge = isPassed
+              ? `<span class="pill-pass">BYPASSED</span>`
+              : `<span class="pill-block">BLOCKED</span>`;
+            const pts = t.points_awarded > 0 ? `+${t.points_awarded}` : `0`;
+            const time = t.timestamp ? new Date(t.timestamp).toLocaleTimeString() : "—";
+
+            return `
+              <tr>
+                <td style="font-family:var(--font-mono); font-size:0.72rem; color:var(--text-dim);">${time}</td>
+                <td><span style="font-family:var(--font-mono); font-weight:700; color:var(--neon-cyan);">${escapeHtml(t.layer_targeted)}</span></td>
+                <td>${badge}</td>
+                <td style="font-family:var(--font-mono); font-weight:700; color:${t.points_awarded > 0 ? 'var(--neon-amber)' : 'var(--text-dim)'};">${pts}</td>
+                <td>
+                  <pre class="code-snippet">${escapeHtml(t.payload_summary || '—')}</pre>
+                </td>
+              </tr>
+            `;
+          }).join("");
+        }
+
+        document.getElementById("detailModal").classList.add("active");
+
+      } catch (err) {
+        alert("Failed to load hacker details: " + err.message);
+      }
+    }
+
+    function closeDetailModal() {
+      document.getElementById("detailModal").classList.remove("active");
+    }
+
+    // ─── SVG Points Accumulation Chart ───
+    function renderPointsChart(pointsList) {
+      const svg = document.getElementById("pointsSvgChart");
+      if (!pointsList || pointsList.length < 2) {
+        svg.innerHTML = `<text x="300" y="60" text-anchor="middle" fill="#64748b" font-size="12" font-family="JetBrains Mono">Need at least 2 attempts to render velocity curve.</text>`;
+        return;
+      }
+
+      const width = 600;
+      const height = 120;
+      const padding = 20;
+
+      const maxPts = Math.max(...pointsList.map(p => p.cumulative_points), 100);
+      const points = pointsList.map((p, index) => {
+        const x = padding + (index / (pointsList.length - 1)) * (width - 2 * padding);
+        const y = height - padding - (p.cumulative_points / maxPts) * (height - 2 * padding);
+        return { x, y, pts: p.cumulative_points };
+      });
+
+      const pathData = points.reduce((acc, pt, i) => `${acc} ${i === 0 ? "M" : "L"} ${pt.x} ${pt.y}`, "");
+      const areaData = `${pathData} L ${points[points.length - 1].x} ${height - padding} L ${points[0].x} ${height - padding} Z`;
+
+      svg.innerHTML = `
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#00f0ff" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <line x1="${padding}" y1="${height - padding}" x2="${width - padding}" y2="${height - padding}" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+        <path d="${areaData}" fill="url(#chartGrad)"/>
+        <path d="${pathData}" fill="none" stroke="#00f0ff" stroke-width="2"/>
+        ${points.map(pt => `<circle cx="${pt.x}" cy="${pt.y}" r="3" fill="#00ff88" stroke="#05070a" stroke-width="1.5"/>`).join("")}
+      `;
+    }
+
+    // ─── CSV Export ──────────────────────────────────────────────────────────
+    function downloadCsv(e) {
+      e.preventDefault();
+      if (!adminKey) return;
+      window.open(`${API}/v1/ctf/admin/export.csv?admin_key=${encodeURIComponent(adminKey)}`, "_blank");
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Auto-refresh dashboard stats every 15s
+    setInterval(() => {
+      if (adminKey && document.getElementById("mainDashboard").style.display !== "none") {
+        loadGlobalStats();
+      }
+    }, 15000);
   </script>
 </body>
 </html>
